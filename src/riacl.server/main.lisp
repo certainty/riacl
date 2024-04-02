@@ -8,6 +8,13 @@
     :reader data-api
     :initarg :data-api)))
 
+(defmethod print-object ((object server) stream)
+  (print-unreadable-object (object stream :type t :identity nil)
+    (format stream "Cluster: ~a Local Node ID: ~a Data API: ~a"
+            (cluster:cluster-name (cluster-manager object))
+            (cluster:cluster-node-id (cluster:local-node (cluster-manager object)))
+            (data-api object))))
+
 (defparameter *server-instance* nil "The server node instance.")
 
 (define-condition server-already-started (simple-error)
@@ -34,7 +41,7 @@
                    this-node (cluster:join-this-node cluster-manager)
                    data-api (data.api:start-api (cluster:cluster-node-id this-node))
                    *server-instance* (make-instance 'server :cluster-manager cluster-manager :data-api data-api))
-             (log:info "[Server] All subsystems started.")
+             (log:info "[Server] All subsystems started. Cluster name: ~A" config:*cluster.name*)
              *server-instance*)
         (unless *server-instance*
           (when data-api (data.api:stop-api data-api))

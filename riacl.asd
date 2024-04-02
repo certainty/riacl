@@ -29,7 +29,9 @@
    #:log4cl
    #:str
    #:random-uuid
-   #:trivial-signal)
+   #:trivial-signal
+   #:cl-messagepack
+   #:chanl)
   :pathname "src/riacl.server"
   :serial t
   :components
@@ -41,6 +43,14 @@
     ((:file "package")
      (:file "cluster")
      (:file "manager")))
+   (:module "data/serialization"
+    :components
+    ((:file "package")
+     (:file "kv")))
+   (:module "data/storage"
+    :components
+    ((:file "package")
+     (:file "backend")))
    (:module "data"
     :components
     ((:file "package")

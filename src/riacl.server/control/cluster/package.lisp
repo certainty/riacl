@@ -7,6 +7,8 @@
   (:import-from :serapeum :->)
   (:export
    #:cluster-manager
+   #:cluster-name
+   #:local-node
    #:manager-for
    #:join-this-node
    #:leave-this-node

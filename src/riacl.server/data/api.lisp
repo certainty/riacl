@@ -21,6 +21,10 @@
     :initform (error "No app provided")))
   (:documentation "The data plane API server"))
 
+(defmethod print-object ((api data-api) stream)
+  (print-unreadable-object (api stream :type t :identity nil)
+    (format stream "listen-address: ~A" (data-api-listen-address api))))
+
 (defun register-routes (api)
   (with-slots (app) api
     (setf (ningle:route app "/ping" :method :get) (handle-ping api))))

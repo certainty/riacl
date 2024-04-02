@@ -16,6 +16,12 @@
   (let ((state (make-cluster-state)))
     (make-instance 'cluster-manager :cluster-name cluster-name :state state)))
 
+(defun local-node (manager)
+  "Returns the local node for the cluster managed by `manager'."
+  (with-slots (state) manager
+    (with-slots (local-node) state
+      local-node)))
+
 (defun node-id (cluster-name)
   "Generates a unique node id for the given `cluster-name'."
   (format nil "~A-~A" cluster-name (random-uuid:to-string (random-uuid:make-uuid))))
