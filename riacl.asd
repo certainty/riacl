@@ -17,12 +17,43 @@
   :build-operation "deploy-op"
   :build-pathname "riacl"
   :entry-point "riacl.server:main"
-  :depends-on (#:serapeum #:alexandria #:ningle #:cl-dotenv #:log4cl)
+  :depends-on
+  (#:riacl/common
+   #:serapeum
+   #:alexandria
+   #:ningle
+   #:clack
+   #:lack
+   #:cl-json
+   #:cl-dotenv
+   #:log4cl
+   #:str
+   #:random-uuid)
   :pathname "src/riacl.server"
   :serial t
   :components
   ((:file "package")
-   (:file "config")))
+   (:file "config")
+   (:file "logging")
+   (:module "control/cluster"
+    :components
+    ((:file "package")
+     (:file "cluster")
+     (:file "manager")))
+   (:module "data"
+    :components
+    ((:file "package")
+     (:file "api")))
+   (:file "main")))
+
+(defsystem "riacl/common"
+  :description "Common code for riacl."
+  :depends-on (#:serapeum #:alexandria)
+  :serial t
+  :pathname "src/riacl.common"
+  :components
+  ((:file "package")
+   (:file "network")))
 
 (defsystem "riacl/server.tests"
   :description "Unit tests for riacl/server"
