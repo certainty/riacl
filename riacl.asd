@@ -28,7 +28,8 @@
    #:cl-dotenv
    #:log4cl
    #:str
-   #:random-uuid)
+   #:random-uuid
+   #:trivial-signal)
   :pathname "src/riacl.server"
   :serial t
   :components

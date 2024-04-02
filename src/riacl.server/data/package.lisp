@@ -5,5 +5,4 @@
   (:nicknames :data.api)
   (:local-nicknames (:a :alexandria) (:s :serapeum))
   (:import-from :serapeum :->)
-  (:export #:start-api #:stop-api))
-
+  (:export #:start-api #:stop-api #:data-api-handler))
