@@ -1,7 +1,7 @@
 (in-package :cl-user)
 
-(defpackage #:riacl.server
+(defpackage #:riacl.server.cli
   (:use :cl)
   (:local-nicknames (:a :alexandria) (:s :serapeum))
   (:import-from :serapeum :->)
-  (:export #:start-server #:stop-server))
+  (:export #:main))

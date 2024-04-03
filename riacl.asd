@@ -36,26 +36,39 @@
   :serial t
   :components
   ((:file "package")
-   (:file "config")
-   (:file "logging")
-   (:module "control/cluster"
+
+   (:module "config"
+    :components
+    ((:file "package")
+     (:file "config")))
+
+   (:module "cluster"
     :components
     ((:file "package")
      (:file "cluster")
      (:file "manager")))
+
    (:module "data/serialization"
     :components
     ((:file "package")
      (:file "kv")))
+
    (:module "data/storage"
     :components
     ((:file "package")
      (:file "backend")))
-   (:module "data"
+
+   (:module "api/data"
     :components
     ((:file "package")
      (:file "api")))
-   (:file "main")))
+
+   (:file "server")
+
+   (:module "cli"
+    :components
+    ((:file "package")
+     (:file "main")))))
 
 (defsystem "riacl/common"
   :description "Common code for riacl."

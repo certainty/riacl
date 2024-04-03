@@ -1,5 +1,7 @@
 (in-package #:riacl.server)
 
+(defparameter *server-instance* nil "The server node instance.")
+
 (defclass server ()
   ((cluster-manager
     :reader cluster-manager
@@ -15,12 +17,14 @@
             (cluster:cluster-node-id (cluster:local-node (cluster-manager object)))
             (data-api object))))
 
-(defparameter *server-instance* nil "The server node instance.")
 
 (define-condition server-already-started (simple-error)
   ((server :initarg :server :reader server))
   (:report (lambda (condition stream)
              (format stream "Server ~A is already started." (server condition)))))
+
+(defun setup-logging ()
+  (log:config :file2 :ndc config:*log.level*))
 
 (defun start-server ()
   "Start the server node. It will reload the configuration, initialize all subsystems and begin listening for incoming connections."
@@ -55,28 +59,3 @@
       (cluster:leave-this-node cluster-manager)
       (log:info "[Server] All subsystems stopped.")
       (setf *server-instance* nil))))
-
-(defun signal-stop-gracefully (signo)
-  "Signal the server to stop gracefully."
-  (declare (ignore signo))
-  (log:info "[Server] Recieved stop signal. Stopping server.")
-  (stop-server)
-  (sb-ext:quit))
-
-(defun signal-restart (signo)
-  "Signal the server to restart."
-  (declare (ignore signo))
-  (log:info "[Server] Recieved restart signal. Restarting server")
-  (stop-server)
-  (start-server))
-
-(defun main (&rest args)
-  (declare (ignorable args))
-  (trivial-signal:signal-handler-bind ((:term #'signal-stop-gracefully)
-                                       (:int #'signal-stop-gracefully)
-                                       (:quit #'signal-stop-gracefully)
-                                       (:hup #'signal-restart)
-                                       (:usr1 #'signal-stop-gracefully))
-    (start-server)
-    ;; wait for signals
-    (loop (sleep 1))))

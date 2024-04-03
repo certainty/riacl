@@ -3,14 +3,20 @@
 (s:defconst +system-path+ (asdf:system-source-directory :riacl/server))
 (s:defconst +env-file-pathname+ (asdf:system-relative-pathname :riacl/server ".env"))
 
-(defvar *log.level* :info "The log level to use")
-(defvar *cluster.name* "riacl" "The name of the cluster")
-(defvar *cluster.node-name* nil "The name of the node in the cluster")
+(defparameter *log.level* :info "The log level to use")
+
+(defparameter *cluster.name* "riacl" "The name of the cluster")
+(defparameter *cluster.vnodes* 3 "The number of vnodes per virtual node")
+(defparameter *cluster.seed-nodes* '() "The addresses of the seed nodes for the gossip protocol")
+(defparameter *consistency.read-quorum* 2 "The number of replicas to read from before considering a read successful")
+(defparameter *consistency.write-quorum* 2 "The number of replicas to write to before considering a write successful")
+(defparameter *replication.n_val* 3 "The number of replicas to store for each key")
+(defparameter *replication.default-conflict-resolution* :last-write-wins "The conflict resolution strategy to use")
+
 (defvar *api.listen-address* nil "The address to listen for API requests")
 (defvar *control.listen-address* nil "The address to listen for control requests." )
-(defvar *control.seed-nodes* '() "The addresses of the seed nodes to connect to")
-(defvar *storage.backend* :memory "The storage backend to use")
 
+(defvar *storage.backend* :memory "The storage backend to use")
 
 (define-condition invalid-configuration-value (error)
   ((name :initarg :name :reader name)
@@ -67,10 +73,20 @@
 (defun load-config ()
   (.env:load-env +env-file-pathname+)
   (setf *log.level* (load-env-var "LOG_LEVEL" #'as-log-level :default :debug))
+
   (setf *api.listen-address* (load-env-var "API_LISTEN_ADDRESS" #'as-network-address :default (network:make-network-address "127.0.0.1" 9999)))
   (setf *control.listen-address* (load-env-var "CONTROL_LISTEN_ADDRESS" #'as-network-address :default (network:make-network-address "127.0.0.1" 8888)))
-  (setf *control.seed-nodes* (load-env-var "CONTROL_SEED_NODES" (as-comma-separated-of #'as-network-address) :default '()))
-  (setf *storage.backend* (load-env-var "STORAGE_BACKEND" (as-one-of '("memory" "sqlite")) :default :memory))
+
+  (setf *storage.backend* (load-env-var "STORAGE_BACKEND" (as-one-of '("memory" "lmbd" "leveldb")) :default :memory))
+
   (setf *cluster.name* (load-env-var "CLUSTER_NAME" #'identity :default "riacl"))
+  (setf *cluster.vnodes* (load-env-var "CLUSTER_VNODES" #'as-integer :default 3))
+  (setf *cluster.seed-nodes* (load-env-var "CLUSTER_SEED_NODES" (as-comma-separated-of #'as-network-address) :default '()))
+
+  (setf *consistency.read-quorum* (load-env-var "CONSISTENCY_READ_QUORUM" #'as-integer :default 2))
+  (setf *consistency.write-quorum* (load-env-var "CONSISTENCY_WRITE_QUORUM" #'as-integer :default 2))
+
+  (setf *replication.n_val* (load-env-var "REPLICATION_N_VAL" #'as-integer :default 3))
+  (setf *replication.default-conflict-resolution* (load-env-var "REPLICATION_DEFAULT_CONFLICT_RESOLUTION" (as-one-of '("last-write-wins" "first-write-wins")) :default :last-write-wins))
 
   t)
