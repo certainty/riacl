@@ -88,5 +88,4 @@
 
   (setf *replication.n_val* (load-env-var "REPLICATION_N_VAL" #'as-integer :default 3))
   (setf *replication.default-conflict-resolution* (load-env-var "REPLICATION_DEFAULT_CONFLICT_RESOLUTION" (as-one-of '("last-write-wins" "first-write-wins")) :default :last-write-wins))
-
   t)

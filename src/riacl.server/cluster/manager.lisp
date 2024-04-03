@@ -22,9 +22,11 @@
     (with-slots (local-node) state
       local-node)))
 
-(defun node-id (cluster-name)
-  "Generates a unique node id for the given `cluster-name'."
-  (format nil "~A-~A" cluster-name (random-uuid:to-string (random-uuid:make-uuid))))
+(defun node-id (cluster-name listen-address)
+  "Generates a cluster node id, which is URN consisting of the cluster name, the listen address of the node and a random 64bit ID"
+  (let ((id (random (expt 2 64)))
+        (ip-address (network:network-address-host listen-address)))
+    (format nil "urn:x-riacl:~A:~A:~X" cluster-name ip-address id)))
 
 (defun join-this-node (manager)
   "Joins the current node to the cluster managed by `manager'. Returns the new node."
@@ -32,7 +34,7 @@
     (with-slots (local-node) state
       (when local-node
         (error "This node has already joined the cluster"))
-      (setf local-node (make-cluster-node (node-id cluster-name) config:*control.listen-address*))
+      (setf local-node (make-cluster-node (node-id cluster-name config:*control.listen-address*) config:*control.listen-address*))
       local-node)))
 
 (defun leave-this-node (manager)
