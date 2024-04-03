@@ -48,7 +48,7 @@
      (:file "cluster")
      (:file "manager")))
 
-   (:module "data/serialization"
+   (:module "data"
     :components
     ((:file "package")
      (:file "kv")))
@@ -77,6 +77,7 @@
   :pathname "src/riacl.common"
   :components
   ((:file "package")
+   (:file "vector-clock")
    (:file "network")))
 
 (defsystem "riacl/server.tests"

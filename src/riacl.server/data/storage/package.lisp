@@ -11,3 +11,10 @@
    #:put-value
    #:get-value
    #:rem-value))
+
+(defpackage #:riacl.server.data.storage.memory
+  (:use :cl)
+  (:nicknames :storage.memory)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export))
