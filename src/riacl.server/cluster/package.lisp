@@ -1,5 +1,22 @@
 (in-package :cl-user)
 
+(defpackage #:riacl.server.cluster.identifier
+  (:use :cl #:riacl.prelude)
+  (:nicknames :cluster.identifiers :identifier)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export
+   #:identifier
+   #:identifierp
+   #:identifier=
+   #:identifier-sxhash
+   #:kind-of
+   #:cluster-name
+   #:bucket-name
+   #:node-name
+   #:vnode-name
+   #:object-key))
+
 (defpackage #:riacl.server.cluster
   (:use :cl)
   (:nicknames :server.cluster :cluster)

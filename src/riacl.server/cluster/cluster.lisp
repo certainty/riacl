@@ -1,39 +1,39 @@
 (in-package :riacl.server.cluster)
 
-(defclass cluster-node ()
-  ((id
-    :reader cluster-node-id
+(defclass node ()
+  ((name
+    :reader node-name
+    :initarg :name
+    :initform (error "name is required"))
+   (id
+    :reader node-id
     :initarg :id
-    :initform (error "id is required"))
-   (address
-    :reader cluster-node-address
-    :initarg :address
-    :initform (error "address is required")
+    :initform (error "id is required"))))
+
+(defclass physical-node (node)
+  ((data-listen-address
+    :reader physical-node-data-listen-address
+    :initarg :data-listen-address
+    :initform (error "data-listen-address is required")
+    :type network:network-address)
+   (control-listen-address
+    :reader physical-node-control-listen-address
+    :initarg :control-listen-address
+    :initform (error "control-listen-address is required")
     :type network:network-address)))
 
-(defclass seed-node (cluster-node)
-  ((neighbours
-    :reader seed-node-neighbours
-    :initarg :neighbours
-    :initform (make-hash-table :test 'equal))))
+(defclass virtual-node (node) ())
 
-(defun make-cluster-node (id address)
-  (make-instance 'cluster-node :id id :address address))
+(deftype membership-state () '(member :joining :leaving :up :exiting :down))
 
-(defclass cluster-state ()
-  ((known-nodes
-    :reader cluster-known-nodes
-    :initarg :known-nodes
-    :initform (make-hash-table :test 'equal))
-   (seed-nodes
-    :reader cluster-seed-nodes
-    :initarg :seed-nodes
-    :initform (make-hash-table :test 'equal))
-   (local-node
-    :reader cluster-local-node
-    :initarg :local-node
-    :initform nil
-    :type (or null cluster-node))))
-
-(defun make-cluster-state ()
-  (make-instance 'cluster-state))
+(defclass cluster ()
+  ((virtual-nodes
+    :reader cluster-virtual-nodes
+    :initarg :virtual-nodes
+    :initform (make-hash-table :test 'equal)
+    :type hash-table)
+   (physical-nodes
+    :reader cluster-physical-nodes
+    :initarg :physical-nodes
+    :initform (make-hash-table :test 'equal)
+    :type hash-table)))

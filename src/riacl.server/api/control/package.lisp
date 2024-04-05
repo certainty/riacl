@@ -1,8 +1,8 @@
 (in-package :cl-user)
 
-(defpackage #:riacl.server.api.data
+(defpackage #:riacl.server.api.control
   (:use :cl)
-  (:nicknames :api.data)
+  (:nicknames :api.control)
   (:local-nicknames (:a :alexandria) (:s :serapeum))
   (:import-from :serapeum :->)
-  (:export #:data-api #:make-data-api))
+  (:export #:control-api #:make-control-api))

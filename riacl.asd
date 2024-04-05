@@ -21,17 +21,25 @@
   (#:riacl/common
    #:serapeum
    #:alexandria
+
    #:ningle
    #:clack
    #:lack
-   #:cl-json
-   #:cl-dotenv
-   #:log4cl
-   #:str
-   #:random-uuid
+
+   #:chanl
    #:trivial-signal
+
+   #:cl-json
    #:cl-messagepack
-   #:chanl)
+   #:str
+   #:quri
+
+   #:ironclad
+   #:fast-io
+
+   #:cl-dotenv
+   #:log4cl)
+
   :pathname "src/riacl.server"
   :serial t
   :components
@@ -45,26 +53,30 @@
    (:module "cluster"
     :components
     ((:file "package")
+     (:file "identifiers")
      (:file "cluster")
      (:file "manager")))
 
    (:module "data"
     :components
-    ((:file "package")
-     (:file "kv")))
+    ((:file "package")))
 
-   (:module "data/storage"
+   (:module "api"
     :components
     ((:file "package")
-     (:file "backend")))
+     (:file "foundation")))
 
    (:module "api/data"
     :components
     ((:file "package")
      (:file "api")))
 
-   (:file "server")
+   (:module "api/control"
+    :components
+    ((:file "package")
+     (:file "api")))
 
+   (:file "server")
    (:module "cli"
     :components
     ((:file "package")
@@ -72,11 +84,18 @@
 
 (defsystem "riacl/common"
   :description "Common code for riacl."
-  :depends-on (#:serapeum #:alexandria)
+  :depends-on
+  (
+   #:serapeum
+   #:alexandria
+   #:str
+   )
   :serial t
   :pathname "src/riacl.common"
+
   :components
   ((:file "package")
+   (:file "prelude")
    (:file "vector-clock")
    (:file "network")))
 
@@ -89,7 +108,10 @@
                     (uiop:symbol-call :riacl.server.tests :run-suites))
   :components
   ((:file "package")
-   (:file "runner")))
+   (:file "runner")
+   (:module "cluster"
+    :components
+    ((:file "identifier")))))
 
 (defsystem "riacl/client"
   :description "A client for riacl."

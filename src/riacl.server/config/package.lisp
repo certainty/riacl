@@ -9,8 +9,8 @@
    #:load-config
    #:network-host
    #:network-port
-   #:*api.listen-address*
-   #:*control.listen-address*
+   #:*api.control.listen-address*
+   #:*api.data.listen-address*
    #:*control.seed-nodes*
    #:*storage.backend*
    #:*cluster.name*

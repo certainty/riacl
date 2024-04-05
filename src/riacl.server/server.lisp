@@ -12,11 +12,10 @@
 
 (defmethod print-object ((object server) stream)
   (print-unreadable-object (object stream :type t :identity nil)
-    (format stream "Cluster: ~a Local Node ID: ~a Data API: ~a"
+    (format stream "~%Cluster: ~a ~%Local Node ID: ~a~%Data API: ~a~%"
             (cluster:cluster-name (cluster-manager object))
             (cluster:cluster-node-id (cluster:local-node (cluster-manager object)))
             (data-api object))))
-
 
 (define-condition server-already-started (simple-error)
   ((server :initarg :server :reader server))
@@ -38,24 +37,29 @@
     (setup-logging)
     (let ((cluster-manager nil)
           (this-node nil)
-          (data-api nil))
+          (data-api nil)
+          (control-api nil))
       (unwind-protect
            (progn
              (setf cluster-manager (cluster:manager-for config:*cluster.name*)
                    this-node (cluster:join-this-node cluster-manager)
-                   data-api (data.api:start-api (cluster:cluster-node-id this-node))
+                   data-api (api.data:make-data-api (cluster:cluster-node-id this-node))
+                   control-api (api.control:make-control-api (cluster:cluster-node-id this-node))
                    *server-instance* (make-instance 'server :cluster-manager cluster-manager :data-api data-api))
+             (api:start-api data-api)
+             (api:start-api control-api)
              (log:info "[Server] All subsystems started. Cluster name: ~A" config:*cluster.name*)
              *server-instance*)
         (unless *server-instance*
-          (when data-api (data.api:stop-api data-api))
+          (when data-api
+            (api:stop-api data-api))
           (log:info "[Server] All subsystems stopped."))))))
 
 (defun stop-server ()
   "Stop the server node. It will close all connections, stop listening for incoming connections and shutdown all subsystems."
   (when *server-instance*
     (with-slots (data-api cluster-manager) *server-instance*
-      (data.api:stop-api data-api)
+      (api:stop-api data-api)
       (cluster:leave-this-node cluster-manager)
       (log:info "[Server] All subsystems stopped.")
       (setf *server-instance* nil))))
