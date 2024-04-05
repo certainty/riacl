@@ -17,6 +17,14 @@
    #:vnode-name
    #:object-key))
 
+(defpackage #:riacl.server.cluster.ring
+  (:use :cl)
+  (:nicknames :server.cluster.ring :cluster.ring :ring)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export
+   #:consistent-hash-ring))
+
 (defpackage #:riacl.server.cluster
   (:use :cl)
   (:nicknames :server.cluster :cluster)
