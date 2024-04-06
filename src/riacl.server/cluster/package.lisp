@@ -25,6 +25,21 @@
   (:export
    #:consistent-hash-ring))
 
+(defpackage #:riacl.server.cluster.vector-clock
+  (:use :cl)
+  (:nicknames :vector-clock :vlock)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:shadow :merge)
+  (:export
+   #:vector-clock
+   #:make-vector-clock
+   #:merge
+   #:descendsp
+   #:descends-dot-p
+   #:dominatsp
+   #:prune))
+
 (defpackage #:riacl.server.cluster
   (:use :cl)
   (:nicknames :server.cluster :cluster)

@@ -62,14 +62,14 @@
 
 (define-identifier :cluster cluster-name ((name string)) "Create a cluster identifier from the `name`.")
 
-(define-identifier :node node-name ((network-address integer) (given-name string))
-                   "Create a node-name from the `network-address` and `given-name`'.
-The `network-address` is the IP address of the node.
+(define-identifier :node node-name ((ip-address integer) (given-name string))
+                   "Create a node-name from the `ip-address` and `given-name`'.
+The `ip-address` is the IP address of the node.
 The `given-name` is the name of the node as given by the user.")
 
-(define-identifier :vnode vnode-name ((network-address integer) (given-name string) (index integer))
-                   "Create a vnode identifier from the `network-address`, `node`, and `index`.
-The `network-address` is the IP address of the node.
+(define-identifier :vnode vnode-name ((ip-address integer) (given-name string) (index integer))
+                   "Create a vnode identifier from the `ip-address`, `node`, and `index`.
+The `ip-address` is the IP address of the node.
 The `given-name` is the node identifier.
 The `index` is the index of the vnode on the node.")
 

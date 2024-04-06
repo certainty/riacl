@@ -36,9 +36,9 @@
 
    #:ironclad
    #:fast-io
-
    #:cl-dotenv
-   #:log4cl)
+   #:log4cl
+   #:local-time)
 
   :pathname "src/riacl.server"
   :serial t
@@ -54,6 +54,7 @@
     :components
     ((:file "package")
      (:file "identifiers")
+     (:file "vector-clock")
      (:file "cluster")
      (:file "manager")))
 
@@ -82,36 +83,45 @@
     ((:file "package")
      (:file "main")))))
 
-(defsystem "riacl/common"
-  :description "Common code for riacl."
-  :depends-on
-  (
-   #:serapeum
-   #:alexandria
-   #:str
-   )
-  :serial t
-  :pathname "src/riacl.common"
-
-  :components
-  ((:file "package")
-   (:file "prelude")
-   (:file "vector-clock")
-   (:file "network")))
-
 (defsystem "riacl/server.tests"
   :description "Unit tests for riacl/server"
   :depends-on (#:lisp-unit2  #:riacl/server)
   :pathname "test/riacl.server"
-  :perform (test-op (o c)
-                    (declare (ignore o c))
-                    (uiop:symbol-call :riacl.server.tests :run-suites))
   :components
   ((:file "package")
    (:file "runner")
    (:module "cluster"
     :components
-    ((:file "identifier")))))
+    ((:file "identifier"))))
+  :perform (test-op (o c)
+                    (declare (ignore o c))
+                    (uiop:symbol-call :riacl.server.tests :run-suites)))
+
+(defsystem "riacl/common"
+  :description "Common code for riacl."
+  :depends-on
+  (#:serapeum
+   #:alexandria
+   #:str)
+  :serial t
+  :pathname "src/riacl.common"
+  :in-order-to ((test-op (test-op "riacl/common.tests")))
+  :components
+  ((:file "package")
+   (:file "prelude")
+   (:file "network")))
+
+(defsystem "riacl/common.tests"
+  :description "Unit tests for riacl/common"
+  :depends-on (#:lisp-unit2  #:riacl/common)
+  :pathname "test/riacl.common"
+  :components
+  ((:file "package")
+   (:file "runner")
+   (:file "network"))
+  :perform (test-op (o c)
+                    (declare (ignore o c))
+                    (uiop:symbol-call :riacl.common.tests :run-suites)))
 
 (defsystem "riacl/client"
   :description "A client for riacl."

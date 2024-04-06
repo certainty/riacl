@@ -100,10 +100,8 @@
       (leave ()
         :report "Leave the current API running"
         (return-from start-api)))
-    (let ((host (network:network-address-host listen-address))
-          (port (network:network-address-port listen-address)))
-      (log:info "[~a] Starting on ~a:~a" name host port)
-      (setf handler (clack:clackup app :address host :port port :server server)))))
+    (log:info "[~a] Starting on ~a" name listen-address)
+    (setf handler (clack:clackup app :address host :port port :server server))))
 
 (defun stop-api (api-endpoint)
   "Stops the api endpoint and removes all routes. It's safe to start the API again with the same object after calling this function."

@@ -13,24 +13,16 @@
 (defpackage #:riacl.common.network
   (:use :cl)
   (:nicknames :riacl.network :network)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
   (:export
-   #:network-address
-   #:parse-network-address
-   #:network-address-host
-   #:network-address-port
-   #:make-network-address
+   #:address
+   #:address=
+   #:parse-address
+   #:address-ipv4
+   #:address-port
+   #:make-address
    #:dotted-quad->integer
    #:integer->dotted-quad
-   ))
-
-(defpackage #:riacl.common.vector-clock
-  (:use :cl)
-  (:nicknames :vector-clock :vlock)
-  (:shadow :merge)
-  (:export
-   :vector-clock
-   :make-vector-clock
-   :update
-   :merge
-   :descendsp
-   :dominatsp))
+   #:port-number
+   #:ipv4-address-as-int))

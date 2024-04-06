@@ -48,7 +48,7 @@
         (error 'value-conversion-error :value value :message "Not an integer"))))
 
 (defun as-network-address (value)
-  (a:if-let ((addr (network:parse-network-address value)))
+  (a:if-let ((addr (network:parse-address value)))
     addr
     (error 'value-conversion-error :value value :message "Not a network address")))
 
@@ -94,8 +94,8 @@
   (.env:load-env +env-file-pathname+)
   (setf *log.level* (load-env-var "LOG_LEVEL" #'as-log-level :default :debug))
 
-  (setf *api.data.listen-address* (load-env-var "API_DATA_LISTEN_ADDRESS" #'as-network-address :default (network:make-network-address "127.0.0.1" 9999)))
-  (setf *api.control.listen-address* (load-env-var "API_CONTROL_LISTEN_ADDRESS" #'as-network-address :default (network:make-network-address "127.0.0.1" 8888)))
+  (setf *api.data.listen-address* (load-env-var "API_DATA_LISTEN_ADDRESS" #'as-network-address :default (network:parse-address "127.0.0.1:9999")))
+  (setf *api.control.listen-address* (load-env-var "API_CONTROL_LISTEN_ADDRESS" #'as-network-address :default (network:parse-address "127.0.0.1:9998")))
 
   (setf *storage.backend* (load-env-var "STORAGE_BACKEND" (as-one-of '("memory" "lmbd" "leveldb")) :default :memory))
 
