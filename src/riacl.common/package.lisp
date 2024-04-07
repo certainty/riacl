@@ -8,7 +8,8 @@
   (:export
    #:keyword->string
    #:string->keyword
-   #:string->symbol))
+   #:string->symbol
+   #:to-plist))
 
 (defpackage #:riacl.common.network
   (:use :cl)

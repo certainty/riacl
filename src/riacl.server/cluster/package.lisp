@@ -9,6 +9,8 @@
    #:identifier
    #:identifierp
    #:identifier=
+   #:identifier<
+   #:identifier>
    #:identifier-sxhash
    #:kind-of
    #:cluster-name
@@ -25,20 +27,32 @@
   (:export
    #:consistent-hash-ring))
 
-(defpackage #:riacl.server.cluster.vector-clock
+(defpackage #:riacl.server.cluster.dvv
   (:use :cl)
-  (:nicknames :vector-clock :vlock)
+  (:nicknames :cluster.dvv :dvv)
   (:local-nicknames (:a :alexandria) (:s :serapeum))
   (:import-from :serapeum :->)
   (:shadow :merge)
   (:export
-   #:vector-clock
-   #:make-vector-clock
-   #:merge
-   #:descendsp
-   #:descends-dot-p
-   #:dominatsp
-   #:prune))
+   #:counter
+   #:dot
+   #:dot-actor-id
+   #:dot-counter
+   #:dot-timestamp
+   #:dot-actor=
+   #:dot-counter=
+   #:dot-counter<
+   #:dot-counter>
+   #:dot-counter>=
+   #:dot-counter<=
+   #:dotted-version-vector
+   #:dotted-version-vector-history
+   #:dotted-version-vector-history-sorted
+   #:dotted-version-vector-dot
+   #:make-dotted-version-vector
+   #:merge*
+   #:emptyp
+   ))
 
 (defpackage #:riacl.server.cluster
   (:use :cl)

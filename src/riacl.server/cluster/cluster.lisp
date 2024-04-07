@@ -17,7 +17,7 @@
     :reader member-vector-clock
     :initarg :vector-clock
     :initform (error "vector-clock is required")
-    :type vector-clock:vector-clock)
+    :type dvv:dotted-version-vector)
    (state
     :reader member-state
     :initarg :state
@@ -45,7 +45,7 @@
     :reader state-vector-clock
     :initarg :vector-clock
     :initform (error "vector-clock is required")
-    :type vector-clock:vector-clock)
+    :type dvv:dotted-version-vector)
    (members
     :reader state-members
     :initarg :members

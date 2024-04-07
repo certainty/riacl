@@ -13,3 +13,7 @@
 
   (defun string->symbol (name &rest parts)
     (intern (string-upcase (apply #'concatenate 'string name parts)))))
+
+(defgeneric to-plist (obj)
+  (:documentation "Create a representation of an object as a property list.
+This needs to be a stable representation, as it can be used for serialization or testing"))

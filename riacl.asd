@@ -54,7 +54,7 @@
     :components
     ((:file "package")
      (:file "identifiers")
-     (:file "vector-clock")
+     (:file "dvv")
      (:file "cluster")
      (:file "manager")))
 

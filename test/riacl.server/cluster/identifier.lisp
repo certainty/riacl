@@ -6,7 +6,7 @@
      (assert-true (identifier:identifierp ,identifier))
      (assert-true (identifier:identifier= ,identifier ,identifier))
      (assert-true (identifier:identifier= ,identifier ,equal-identifier))
-     (assert-false (identifier:identifier= ,identifier ,different-identifier))
+     (assert-true (not (identifier:identifier= ,identifier ,different-identifier)))
      (assert-true (keywordp (identifier:kind-of ,identifier)))
      (assert-no-signal 'error (identifier:identifier-sxhash ,identifier))))
 

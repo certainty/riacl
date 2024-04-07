@@ -16,11 +16,18 @@
 
 (deftype identifier () '(and string (satisfies is-riacl-urn-p)))
 
+(-> identifier= (identifier identifier) boolean)
 (defun identifier= (id1 id2)
-  (string-equal id1 id2))
+  (s:true (string-equal id1 id2)))
 
 (defun identifier-sxhash (id)
   (sxhash id))
+
+(defun identifier< (id1 id2)
+  (string< id1 id2))
+
+(defun identifier> (id1 id2)
+  (string> id1 id2))
 
 (sb-ext:define-hash-table-test identifier= identifier-sxhash)
 

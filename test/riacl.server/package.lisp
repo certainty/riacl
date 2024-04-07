@@ -5,4 +5,5 @@
   (:export #:run-suites))
 
 (defpackage #:riacl.server.tests.cluster
-  (:use :cl :lisp-unit2))
+  (:use :cl :lisp-unit2)
+  (:local-nicknames (:a :alexandria) (:s :serapeum)))
