@@ -92,7 +92,8 @@
    (:file "runner")
    (:module "cluster"
     :components
-    ((:file "identifier"))))
+    ((:file "identifier")
+     (:file "dvv"))))
   :perform (test-op (o c)
                     (declare (ignore o c))
                     (uiop:symbol-call :riacl.server.tests :run-suites)))

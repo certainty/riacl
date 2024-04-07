@@ -88,7 +88,6 @@ Each of those steps is a dot."))
 
 (defclass dotted-version-vector ()
   ((history
-    :reader dotted-version-vector-history
     :initarg :history
     :initform nil
     :type list
@@ -191,50 +190,71 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
   (with-slots (history dot) dvv
     (s:true (and (null history) (not dot)))))
 
-(defun dotted-version-vector-history-sorted (dvv &key (merge-dot nil))
-  "Returns the history of `dvv' sorted by `actor-id'.
-When `merge-dot' is `t' and `dvv' has a dot, its added to the history before sorting.
-  "
+(-> dotted-version-vector-history (dotted-version-vector &key (:merge-dot boolean)) list)
+(defun dotted-version-vector-history (dvv &key (merge-dot nil))
+  "Return the history for the `dvv' as a list of `dot's. It `:merge-dot' is `t' it merges the `dvv's dot if it has one first."
   (with-slots (history dot) dvv
-    (sort
-     (or (and merge-dot (merge-dot-to-history dot history)) history)
-     #'identifier:identifier< :key #'dot-actor-id)))
+    (or (and merge-dot (merge-dot-to-history dot history)) history)))
 
+(-> dotted-version-vector-history-sorted (dotted-version-vector &key (:merge-dot boolean)) list)
+(defun dotted-version-vector-history-sorted (dvv &key (merge-dot nil))
+  "Returns teh history sorted"
+  (with-slots (history dot) dvv
+    (sort-history (or (and merge-dot (merge-dot-to-history dot history)) history))))
+
+
+(-> sort-history (list) list)
+(defun sort-history (history)
+  "Returns the history of `dvv' sorted by `actor-id' "
+  (sort history #'identifier:identifier< :key #'dot-actor-id))
+
+(-> merge* (&rest dotted-version-vector) dotted-version-vector)
 (defun merge* (&rest dvvs)
+  "Merges all `dvvs' and returns a single resulting `dvv'. "
   (cond
     ((null dvvs) (make-dotted-version-vector))
-    ((null (cdr dvvs)) (with-slots (history dot) (car dvvs)
-                         (make-dotted-version-vector :initial-history (merge-dot-to-history dot history))))
+    ((null (cdr dvvs))
+     (let ((single-dvv (car dvvs)))
+       (declare (type dotted-version-vector single-dvv))
+       (with-slots (history dot) single-dvv
+         (make-dotted-version-vector :initial-history (merge-dot-to-history dot history)))))
     (t (reduce #'merge2 dvvs))))
 
+(-> merge2 (dotted-version-vector dotted-version-vector) dotted-version-vector)
 (defun merge2 (dvvA dvvB)
   (make-dotted-version-vector
    :initial-history
    (merge-histories
-    (dotted-version-vector-history-sorted dvvA :merge-dot t)
-    (dotted-version-vector-history-sorted dvvB :merge-dot t))))
+    (dotted-version-vector-history dvvA :merge-dot t)
+    (dotted-version-vector-history dvvB :merge-dot t))))
 
+(-> merge-histories (list list) list)
 (defun merge-histories (historyA historyB)
-  (let ((newHistory nil))
+  "Merges `historyA' and `historyB' and returns the new history."
+  (let ((newHistory nil)
+        (iterA (sort-history historyA))
+        (iterB (sort-history historyB)))
     (loop
-      (let ((dotA (car historyA))
-            (dotB (car historyB)))
+      (let ((dotA (car iterA))
+            (dotB (car iterB)))
         (cond
-          ((null dotA)
-           (return-from merge-histories (append (nreverse newHistory) historyB)))
-          ((null dotB)
-           (return-from merge-histories (append (nreverse newHistory) historyA)))
+          ((null dotA) (return-from merge-histories (append (nreverse newHistory) iterB)))
+          ((null dotB) (return-from merge-histories (append (nreverse newHistory) iterA)))
+
           ((identifier:identifier< (dot-actor-id dotA) (dot-actor-id dotB))
            (push dotA newHistory)
-           (setf historyA (rest historyA)))
+           (setf iterA (rest iterA)))
+
           ((identifier:identifier> (dot-actor-id dotA) (dot-actor-id dotB))
            (push dotB newHistory)
-           (setf historyB (rest historyB)))
+           (setf iterB (rest iterB)))
+
           (t
            (push (merge-dots dotA dotB) newHistory)
-           (setf historyA (rest historyA)
-                 historyB (rest historyB))))))))
+           (setf iterA (rest iterA)
+                 iterB (rest iterB))))))))
 
+(-> merge-dots (dot dot) dot)
 (defun merge-dots (a b)
   "Merges two dots `a' and `b' and returns a new dot as a result of it.
    When the counters are equal it discards `b' merges the timestamp using the maximum of both.
@@ -246,7 +266,7 @@ When `merge-dot' is `t' and `dvv' has a dot, its added to the history before sor
             :counter (dot-counter a)
             :timestamp (max (dot-timestamp a) (dot-timestamp b))))))
 
-
+(-> merge-dot-to-history ((or null dot) list) list)
 (defun merge-dot-to-history (dot history)
   "Merges the `dot' into the `history' and creates a new `history'.
 This overwrites any existing `dot' with the same `actor-id'."
