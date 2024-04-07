@@ -202,11 +202,30 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
   (with-slots (history dot) dvv
     (sort-history (or (and merge-dot (merge-dot-to-history dot history)) history))))
 
-
 (-> sort-history (list) list)
 (defun sort-history (history)
   "Returns the history of `dvv' sorted by `actor-id' "
   (sort history #'identifier:identifier< :key #'dot-actor-id))
+
+(-> descendsp (dotted-version-vector dotted-version-vector) boolean)
+(defun descendsp (dvvA dvvB)
+  t)
+
+(-> descends-dot-p (dotted-version-vector dot) boolean)
+(defun descends-dot-p (dvv dot)
+  t)
+
+(-> dominatesp (dotted-version-vector dotted-version-vector) boolean)
+(defun dominiatesp (dvvA dvvB)
+  t)
+
+(-> incf-actor (identifier:identifier dotted-version-vector) dotted-version-vector)
+(defun incf-actor (actor-id dvv)
+  dvv)
+
+(-> all-actors (dotted-version-vector) list)
+(defun all-actors (dvv)
+  (mapcar #'dot-actor-id (dotted-version-vector-history dvv :merge-dot t)))
 
 (-> merge* (&rest dotted-version-vector) dotted-version-vector)
 (defun merge* (&rest dvvs)
