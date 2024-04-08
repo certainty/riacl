@@ -92,6 +92,13 @@ Each of those steps is a dot."))
   (s:true (or (dot-counter= dot1 dot2)
               (dot-counter> dot1 dot2))))
 
+(-> incf-dot ((or null dot)) (or null dot))
+(defun incf-dot (dot)
+  "Updates the dot by incrementing its counter and udjusting it's timestamp."
+  (when dot
+    (incf (slot-value dot 'counter))
+    (setf (slot-value dot 'timestamp) (get-universal-time))))
+
 (defclass dotted-version-vector ()
   ((history
     :initarg :history
@@ -228,22 +235,48 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 
 (-> descendsp (dotted-version-vector dotted-version-vector) boolean)
 (defun descendsp (dvvA dvvB)
-  t)
+  "Check if `dvvA' directly descends from `dvvB'.
+`dvvA' is said to descend from `dvvB' if all of `dvvB's dots also exist in `dvvA' but with a counter that is greater or equal than the corresponding one in `dvvB'.
+In other words, it has seen more events from all the actors in `dvvB'.
 
-(-> descends-dot-p (dotted-version-vector dot) boolean)
-(defun descends-dot-p (dvv dot)
-  t)
+IMPORTANT: All `dvv's descent the empty `dvv' and itself.
+ "
+  (or (emptyp dvvB)
+      (let ((historyA (dotted-version-vector-history dvvA :merge-dot t))
+            (historyB (dotted-version-vector-history dvvB :merge-dot t)))
+        (every #'(lambda (dotB)
+                   (a:when-let ((dotA (find dotB :test #'dot-actor= historyA))) ; every dot in dvvB's history also exists in dvvA's history
+                     (dot-counter>= dotA dotB)))
+               historyB)))) ; and also the dotA is >= than in dotB
+
+(-> descends-dot-p (dot dotted-version-vector) boolean)
+(defun descends-dot-p (dot dvv)
+  "Return `t' if `dvv' descends from the given `dot'."
+  (let ((history (dotted-version-vector-history dvv :merge-dot)))
+    (a:when-let ((found-dot (find dot history :test #'dot-actor=)))
+      (dot-counter>= found-dot dot))))
 
 (-> dominatesp (dotted-version-vector dotted-version-vector) boolean)
 (defun dominiatesp (dvvA dvvB)
-  t)
+  "Returns `t' if `dvvA' strictly dominates `dvvB'."
+  (and (descendsp dvvA dvvB) (not (descendsp dvvB dvvA))))
 
 (-> incf-actor (identifier:identifier dotted-version-vector) dotted-version-vector)
 (defun incf-actor (actor-id dvv)
-  "Increment the `counter' for `actor-id' in `dvv'.
+  "In-place update the `counter' for `actor-id' in `dvv'.
 If no such actor exists, it will be added with a counter value of 1.
-If it exists, it's counter will be incremented by 1"
-  dvv)
+If it exists, it's counter will be incremented by 1 and its timestamp will be set to now.
+"
+  (with-slots (history) dvv
+    (loop :for dot :in history
+          :when (identifier:identifier= actor-id (dot-actor-id dot))
+            :do (incf-dot dot)
+                (return-from incf-actor dvv))
+    ;; TODO: doublecheck that this is correct. No history but single dot.
+    (prog1 dvv
+      (a:if-let ((existing-dot (slot-value dvv 'dot)))
+        (incf-dot existing-dot)
+        (push (dot actor-id :counter 1) history)))))
 
 (-> actor-id-set (dotted-version-vector) list)
 (defun actor-id-set (dvv)
