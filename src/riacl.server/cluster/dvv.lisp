@@ -225,8 +225,7 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 (-> dotted-version-vector-history-sorted (dotted-version-vector &key (:merge-dot boolean)) list)
 (defun dotted-version-vector-history-sorted (dvv &key (merge-dot nil))
   "Returns teh history sorted"
-  (with-slots (history dot) dvv
-    (sort-history (or (and merge-dot (merge-dot-to-history dot history)) history))))
+  (sort-history (dotted-version-vector-history dvv :merge-dot merge-dot)))
 
 (-> sort-history (list) list)
 (defun sort-history (history)
@@ -252,7 +251,7 @@ IMPORTANT: All `dvv's descent the empty `dvv' and itself.
 (-> descends-dot-p (dot dotted-version-vector) boolean)
 (defun descends-dot-p (dot dvv)
   "Return `t' if `dvv' descends from the given `dot'."
-  (let ((history (dotted-version-vector-history dvv :merge-dot)))
+  (let ((history (dotted-version-vector-history dvv :merge-dot t)))
     (a:when-let ((found-dot (find dot history :test #'dot-actor=)))
       (dot-counter>= found-dot dot))))
 
