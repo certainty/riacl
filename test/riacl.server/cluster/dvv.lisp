@@ -6,6 +6,19 @@
 (serapeum:defconst +vnode-4+ "urn:x-riacl:10:a:4")
 (serapeum:defconst +vnode-5+ "urn:x-riacl:10:a:5")
 
+(define-test dot-equality ()
+  "dot= works"
+  (let ((a (dvv:dot +vnode-1+ :counter 1 :timestamp 2))
+        (b (dvv:dot +vnode-1+ :counter 1 :timestamp 2))
+        (c (dvv:dot +vnode-2+ :counter 1 :timestamp 2))
+        (d (dvv:dot +vnode-1+ :counter 2 :timestamp 2))
+        (e (dvv:dot +vnode-1+ :counter 1 :timestamp 3)))
+    (assert-true  (dvv:dot= a a) "Identical object")
+    (assert-true  (dvv:dot= a b) "Same values")
+    (assert-false (dvv:dot= a c) "Different actors => different dots")
+    (assert-false (dvv:dot= a d) "Different counter => different dots")
+    (assert-false (dvv:dot= a e) "Different timestamp => different dots")))
+
 (define-test merge-works ()
   (let* ((c1 (dvv:make-dotted-version-vector
               :initial-history (list

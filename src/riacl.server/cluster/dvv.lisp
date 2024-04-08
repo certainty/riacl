@@ -60,6 +60,13 @@ Each of those steps is a dot."))
   (with-slots (actor-id counter timestamp) dot
     `(:actor-id ,actor-id :counter ,counter :timestamp ,timestamp)))
 
+(defun dot= (a b)
+  "Returns `t' if `a' and `b' have equal values. They don't need to be the same object."
+  (and
+   (dot-actor= a b)
+   (dot-counter= a b)
+   (= (dot-timestamp a) (dot-timestamp b))))
+
 (-> dot= (dot dot) boolean)
 (defun dot-actor= (dot1 dot2)
   "Returns `t' if the actor-id of `dot1' is equal to the actor-id of `dot2', `nil' otherwise."
@@ -197,6 +204,15 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
     (make-dotted-version-vector
      :initial-history (copy-history history)
      :initial-dot (copy-dot dot))))
+
+(-> dotted-version-vector= (dotted-version-vector dotted-version-vector) (values boolean &optional))
+(defun dotted-version-vector= (dvvA dvvB)
+  "Returns `t' if `dvvA' and `dvvB' have the same `history'.
+`dvvA' and `dvvB' don't have to be the same object.
+"
+  (let ((historyA (dotted-version-vector-history-sorted dvvA :merge-dot t))
+        (historyB (dotted-version-vector-history-sorted dvvB :merge-dot t)))
+    (null (set-difference historyA historyB :test #'dot=))))
 
 (-> copy-history (list) list)
 (defun copy-history (source-history)

@@ -36,6 +36,8 @@
   (:export
    #:counter
    #:dot
+   #:copy-dot
+   #:dot=
    #:dot-actor-id
    #:dot-counter
    #:dot-timestamp
@@ -46,12 +48,17 @@
    #:dot-counter>=
    #:dot-counter<=
    #:dotted-version-vector
+   #:copy-dotted-version-vector
+   #:dotted-version-vector=
    #:dotted-version-vector-history
    #:dotted-version-vector-history-sorted
    #:dotted-version-vector-dot
    #:make-dotted-version-vector
    #:merge*
    #:emptyp
+   #:descendsp
+   #:descends-dot-p
+   #:dominatesp
    ))
 
 (defpackage #:riacl.server.cluster
