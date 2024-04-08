@@ -46,6 +46,12 @@ Each of those steps is a dot."))
 (defun dot (actor-id &key (counter 1) (timestamp nil timestamp-provided-p))
   (make-instance 'dot :actor-id actor-id :counter counter :timestamp (or (and timestamp-provided-p timestamp) (get-universal-time))))
 
+(-> copy-dot (dot) dot)
+(defun copy-dot (given-dot)
+  "Create a copy of `given-dot'"
+  (with-slots (actor-id counter timestamp) given-dot
+    (dot actor-id :counter counter :timestamp timestamp)))
+
 (defmethod print-object ((dot dot) stream)
   (print-unreadable-object (dot stream :type t :identity t)
     (format stream "actor-id: ~A counter: ~A timestamp: ~A" (dot-actor-id dot) (dot-counter dot) (dot-timestamp dot))))
@@ -177,6 +183,19 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
   "Create an empty dotted version vector."
   (make-instance 'dotted-version-vector :history initial-history :dot initial-dot))
 
+(-> copy-dotted-version-vector (dotted-version-vector) dotted-version-vector)
+(defun copy-dotted-version-vector (dvv)
+  "Create a copy of `dvv'"
+  (with-slots (history dot) dvv
+    (make-dotted-version-vector
+     :initial-history (copy-history history)
+     :initial-dot (copy-dot dot))))
+
+(-> copy-history (list) list)
+(defun copy-history (source-history)
+  "Copies `source-history' by creating a new `history' where each element is a copy of the `dot' in `source-history'."
+  (mapcar #'copy-dot source-history))
+
 (defmethod print-object ((dvv dotted-version-vector) stream)
   (print-unreadable-object (dvv stream :type t :identity t)
     (format stream "([~{~A~^, ~}], ~A)"  (dotted-version-vector-history dvv) (dotted-version-vector-dot dvv))))
@@ -221,10 +240,14 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 
 (-> incf-actor (identifier:identifier dotted-version-vector) dotted-version-vector)
 (defun incf-actor (actor-id dvv)
+  "Increment the `counter' for `actor-id' in `dvv'.
+If no such actor exists, it will be added with a counter value of 1.
+If it exists, it's counter will be incremented by 1"
   dvv)
 
-(-> all-actors (dotted-version-vector) list)
-(defun all-actors (dvv)
+(-> actor-id-set (dotted-version-vector) list)
+(defun actor-id-set (dvv)
+  "Return the set of all `actor-id's in the history of `dvv'."
   (mapcar #'dot-actor-id (dotted-version-vector-history dvv :merge-dot t)))
 
 (-> merge* (&rest dotted-version-vector) dotted-version-vector)
