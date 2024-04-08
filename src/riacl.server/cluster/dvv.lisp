@@ -185,10 +185,10 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
   (with-slots (history dot) dvv
     `(:history ,(mapcar #'prelude:to-plist history) :dot ,dot)))
 
-(-> emptyp (dotted-version-vector) boolean)
+(-> emptyp (dotted-version-vector) (values boolean &optional))
 (defun emptyp (dvv)
   (with-slots (history dot) dvv
-    (s:true (and (null history) (not dot)))))
+    (and (null history) (not dot))))
 
 (-> dotted-version-vector-history (dotted-version-vector &key (:merge-dot boolean)) list)
 (defun dotted-version-vector-history (dvv &key (merge-dot nil))
@@ -229,7 +229,11 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 
 (-> merge* (&rest dotted-version-vector) dotted-version-vector)
 (defun merge* (&rest dvvs)
-  "Merges all `dvvs' and returns a single resulting `dvv'. "
+  "Creates a new `dotted-version-vector' which is the result of a merged history from all of the provided `dvvs'.
+An empty list of `dvvs' will always created a fresh empty `dotted-version-vector'.
+A single `dvv' will be merged, by migrating its `dot' into its `history'.
+A list of `dvvs' will be merged by merging all ther histories.
+  "
   (cond
     ((null dvvs) (make-dotted-version-vector))
     ((null (cdr dvvs))
@@ -241,6 +245,9 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 
 (-> merge2 (dotted-version-vector dotted-version-vector) dotted-version-vector)
 (defun merge2 (dvvA dvvB)
+  "Helper function to merge `dvvA' and `dvvB'.
+Is used in `merge*' to fold over the list of `dvvs'.
+ "
   (make-dotted-version-vector
    :initial-history
    (merge-histories
@@ -249,7 +256,15 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 
 (-> merge-histories (list list) list)
 (defun merge-histories (historyA historyB)
-  "Merges `historyA' and `historyB' and returns the new history."
+  "Merges `historyA' and `historyB' and returns the new history.
+
+The resulting history is created by applying a pair-wise merge of `dot's.
+In case the two `dot's have equal `actor-id' they will be merged using `merge-dots'.
+Otherwise they will be inserted at the appropriate postion.
+The result is a combined history, ordered by `actor-id'
+
+You should not have to use this function directly, but use `merge*' instead.
+"
   (let ((newHistory nil)
         (iterA (sort-history historyA))
         (iterB (sort-history historyB)))
@@ -275,9 +290,12 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 
 (-> merge-dots (dot dot) dot)
 (defun merge-dots (a b)
-  "Merges two dots `a' and `b' and returns a new dot as a result of it.
-   When the counters are equal it discards `b' merges the timestamp using the maximum of both.
+  "Merges two dots `a' and `b' and returns a new `dot' as a result of it.
+Dots are merged by applying the `max' over their counters.
+If both counters are equal, the `timestamp's to break the tiej
+The `actor-id' of both dots must be equal in terms of `identifier:identifier='
   "
+  (assert (identifier:identifier= (dot-actor-id a) (dot-actor-id b)))
   (cond
     ((dot-counter> a b) a)
     ((dot-counter< a b) b)
@@ -287,8 +305,9 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 
 (-> merge-dot-to-history ((or null dot) list) list)
 (defun merge-dot-to-history (dot history)
-  "Merges the `dot' into the `history' and creates a new `history'.
-This overwrites any existing `dot' with the same `actor-id'."
+  "Returns a new `history' which is the result of mergin `dot' into the provided `history'.
+The order of history is NOT preserved.
+"
   (if (null dot)
       history
       (let ((new-history (remove-if (lambda (item) (dot-actor= dot item)) history)))

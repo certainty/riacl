@@ -6,12 +6,6 @@
 (serapeum:defconst +vnode-4+ "urn:x-riacl:10:a:4")
 (serapeum:defconst +vnode-5+ "urn:x-riacl:10:a:5")
 
-(define-test examples-of-dotted-version-vector ()
-  "This is an example test showing the usage of dotted version vectors"
-  (let ((a (dvv:make-dotted-version-vector))
-        (b (dvv:make-dotted-version-vector)))
-    (assert-true t)))
-
 (define-test merge-works ()
   (let* ((c1 (dvv:make-dotted-version-vector
               :initial-history (list

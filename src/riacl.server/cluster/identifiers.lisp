@@ -16,9 +16,9 @@
 
 (deftype identifier () '(and string (satisfies is-riacl-urn-p)))
 
-(-> identifier= (identifier identifier) boolean)
+(-> identifier= (identifier identifier) (values boolean &optional))
 (defun identifier= (id1 id2)
-  (s:true (string-equal id1 id2)))
+  (string-equal id1 id2))
 
 (defun identifier-sxhash (id)
   (sxhash id))
