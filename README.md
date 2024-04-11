@@ -1,7 +1,7 @@
 # Riak inspired key-value store in Common Lisp
 
-For me one of the best ways to learn about difficult concepts is to reimplement
-the wheel and re-implement existing solutions. Riak was one of the early distributed systems
+For me one of the best ways to learn about difficult concepts is to reinvent
+the wheel and implement existing solutions. Riak was one of the early distributed systems
 that applied the principles described in the dynamo paper. This was cutting edge distributed 
 systems engineering back then.
 
