@@ -14,6 +14,7 @@
    #:api-list-address
    #:make-api-endpoint
    #:add-route
+   #:add-routes
    #:get-request-header
    #:register-encoder
    #:encode-content

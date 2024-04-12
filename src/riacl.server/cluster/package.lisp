@@ -61,6 +61,13 @@
    #:dominatesp
    ))
 
+(defpackage #:riacl.server.cluster.faults
+  (:use :cl)
+  (:nicknames :cluster.dvv :dvv)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->))
+
+
 (defpackage #:riacl.server.cluster
   (:use :cl)
   (:nicknames :server.cluster :cluster)

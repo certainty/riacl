@@ -8,7 +8,8 @@
   (:documentation "The control plane API server"))
 
 (defun register-routes (endpoint)
-  (api:add-route endpoint #'handle-ping "/ping" :method :get))
+  (api:add-routes endpoint
+                  ((:get "/ping" #'handle-ping))))
 
 (defun handle-ping (endpoint params)
   (declare (ignore endpoint params))
