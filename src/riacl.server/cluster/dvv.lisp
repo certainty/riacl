@@ -46,7 +46,7 @@ Each of those steps is a dot."))
 
 (-> dot (identifier:identifier &key (:counter counter) (:timestamp timestamp)) (values dot &optional))
 (defun dot (actor-id &key (counter 1) (timestamp nil timestamp-provided-p))
-  (make-instance 'dot :actor-id actor-id :counter counter :timestamp (or (and timestamp-provided-p timestamp) (get-universal-time))))
+  (make-instance 'dot :actor-id actor-id :counter counter :timestamp (or (and timestamp-provided-p timestamp) (clock:seconds-since-epoch))))
 
 (-> copy-dot (dot) dot)
 (defun copy-dot (given-dot)
@@ -105,8 +105,9 @@ Each of those steps is a dot."))
 (defun incf-dot (dot)
   "Updates the `dot' by incrementing its `counter' and udjusting it's `counter'."
   (when dot
-    (incf (slot-value dot 'counter))
-    (setf (slot-value dot 'timestamp) (get-universal-time))))
+    (prog1 dot
+      (incf (slot-value dot 'counter))
+      (setf (slot-value dot 'timestamp) (clock:seconds-since-epoch)))))
 
 (defclass dotted-version-vector ()
   ((history

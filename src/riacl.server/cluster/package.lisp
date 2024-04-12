@@ -47,6 +47,7 @@
    #:dot-counter>
    #:dot-counter>=
    #:dot-counter<=
+   #:incf-dot
    #:dotted-version-vector
    #:copy-dotted-version-vector
    #:dotted-version-vector=
@@ -63,7 +64,7 @@
 
 (defpackage #:riacl.server.cluster.faults
   (:use :cl)
-  (:nicknames :cluster.dvv :dvv)
+  (:nicknames :cluster.faults :faults)
   (:local-nicknames (:a :alexandria) (:s :serapeum))
   (:import-from :serapeum :->))
 

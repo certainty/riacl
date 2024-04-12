@@ -1,10 +1,28 @@
 (in-package :riacl.server.tests.cluster)
 
+(defclass test-clock ()
+  ((seconds
+    :initform 0
+    :initarg :seconds)))
+
+(defun advance-clock (clock by-seconds)
+  (with-slots (seconds) clock
+    (incf seconds by-seconds)))
+
+(defmethod clock:seconds-since-epoch/impl ((clock test-clock))
+  (slot-value clock 'seconds))
+
+(defmacro with-test-clock ((clock-name &optional (initial-value 0)) &body body)
+  `(let* ((,clock-name (make-instance 'test-clock :seconds ,initial-value))
+          (clock:*universal-clock* ,clock-name))
+     ,@body))
+
 (serapeum:defconst +vnode-1+ "urn:x-riacl:10:a:1")
 (serapeum:defconst +vnode-2+ "urn:x-riacl:10:a:2" )
 (serapeum:defconst +vnode-3+ "urn:x-riacl:10:a:3")
 (serapeum:defconst +vnode-4+ "urn:x-riacl:10:a:4")
 (serapeum:defconst +vnode-5+ "urn:x-riacl:10:a:5")
+
 
 (define-test dot-equality ()
   "dot= works"
@@ -18,6 +36,19 @@
     (assert-false (dvv:dot= a c) "Different actors => different dots")
     (assert-false (dvv:dot= a d) "Different counter => different dots")
     (assert-false (dvv:dot= a e) "Different timestamp => different dots")))
+
+(define-test incf-dot-works ()
+  (with-test-clock (clock 10)
+    (let ((subject (dvv:dot +vnode-1+ :counter 1 :timestamp 5)))
+      (dvv:incf-dot subject)
+      (assert-equal 2 (dvv:dot-counter subject))
+      (assert-equal 10 (dvv:dot-timestamp subject))
+
+      (advance-clock clock 10)
+      (dvv:incf-dot subject)
+
+      (assert-equal 3 (dvv:dot-counter subject))
+      (assert-equal 20 (dvv:dot-timestamp subject)))))
 
 (define-test merge-works ()
   (let* ((c1 (dvv:make-dotted-version-vector

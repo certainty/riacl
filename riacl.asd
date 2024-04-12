@@ -44,7 +44,7 @@
   :serial t
   :components
   ((:file "package")
-
+   (:file "clock")
    (:module "config"
     :components
     ((:file "package")
