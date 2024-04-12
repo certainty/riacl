@@ -7,8 +7,6 @@
   (:import-from :serapeum :->)
   (:export
    #:keyword->string
-   #:string->keyword
-   #:string->symbol
    #:to-plist))
 
 (defpackage #:riacl.common.network

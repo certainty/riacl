@@ -7,7 +7,7 @@
 (defun known-kind-p (kind)
   (member kind *identifier-kinds* :test #'string-equal))
 
-(deftype kind () '(and keyword (satisfies known-kind-p)))
+(deftype kind () 'keyword)
 
 (-> is-riacl-urn-p (string) (values boolean &optional))
 (defun is-riacl-urn-p (maybe-urn)
@@ -41,7 +41,7 @@
     (destructuring-bind (nid &rest _) (str:split ":" nss)
       (declare (ignore _))
       (if (member nid *identifier-kinds* :test #'string-equal)
-          (string->keyword nid)
+          (a:make-keyword nid)
           (error "Unknown identifier kind: ~a" nid)))))
 
 (-> make-identifier (kind list) string)
@@ -55,7 +55,7 @@
   (let* ((constructor-params (mapcar #'car types-and-names))
          (constructor-param-types (mapcar #'cadr types-and-names))
          (kind-str (string-upcase (string kind)))
-         (kind-predicate (string->symbol kind-str "-p"))
+         (kind-predicate (a:symbolicate kind-str "-p"))
          (id-arg (gensym)))
     `(progn
        (setf *identifier-kinds* (remove-duplicates (cons ,kind-str *identifier-kinds*)))
