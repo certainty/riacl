@@ -23,7 +23,6 @@
 (serapeum:defconst +vnode-4+ "urn:x-riacl:10:a:4")
 (serapeum:defconst +vnode-5+ "urn:x-riacl:10:a:5")
 
-
 (define-test dot-equality ()
   "dot= works"
   (let ((a (dvv:dot +vnode-1+ :counter 1 :timestamp 2))
@@ -49,6 +48,33 @@
 
       (assert-equal 3 (dvv:dot-counter subject))
       (assert-equal 20 (dvv:dot-timestamp subject)))))
+
+(define-test descendsp-empty-clock ()
+  (let ((empty (dvv:make-dotted-version-vector))
+        (c1 (dvv:make-dotted-version-vector
+             :initial-history (list (dvv:dot +vnode-1+ :counter 1 :timestamp 1))))
+        (c2 (dvv:make-dotted-version-vector
+             :initial-dot (dvv:dot +vnode-1+ :counter 2 :timestamp 2))))
+
+    (assert-true (dvv:descendsp c1 empty))
+    (assert-true (dvv:descendsp c2 empty))))
+
+(define-test descendsp-self ()
+  (let ((c1 (dvv:make-dotted-version-vector
+             :initial-history (list (dvv:dot +vnode-1+ :counter 1 :timestamp 1))))
+        (c2 (dvv:make-dotted-version-vector
+             :initial-dot (dvv:dot +vnode-1+ :counter 2 :timestamp 2))))
+    (assert-true (dvv:descendsp c1 c1))
+    (assert-true (dvv:descendsp c2 c2))))
+
+(define-test descendsp ()
+  (let ((c1 (dvv:make-dotted-version-vector)))
+    (dvv:incf-actor c1 +vnode-1+)
+    (dvv:incf-actor c1 +vnode-3+)
+    (let ((c2 (dvv:copy-dotted-version-vector c1)))
+      (dvv:incf-actor c2 +vnode-2+) ; actor vnode-2 only exists in c2
+      (dvv:incf-actor c2 +vnode-1+)
+      (assert-true (dvv:descendsp c2 c1)))))
 
 (define-test merge-works ()
   (let* ((c1 (dvv:make-dotted-version-vector

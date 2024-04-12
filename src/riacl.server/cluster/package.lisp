@@ -55,6 +55,7 @@
    #:dotted-version-vector-history-sorted
    #:dotted-version-vector-dot
    #:make-dotted-version-vector
+   #:incf-actor
    #:merge*
    #:emptyp
    #:descendsp

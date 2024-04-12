@@ -14,7 +14,7 @@
 (deftype timestamp ()
   "Seconds since epoch 00:00 of January 1, 1900 in the GMT time zone.
 Same as returned by `get-universal-time'."
-  '(integer 0  *))
+  '(integer 0 *))
 
 (defclass dot ()
   ((actor-id
@@ -33,7 +33,7 @@ Same as returned by `get-universal-time'."
     :reader dot-timestamp
     :initarg :timestamp
     :initform nil
-    :type (or null timestamp)
+    :type (or null (integer 0 *))
     :documentation
     "The wall clock time when the event happened.
      This is managed by the dotted-version vector and is used to break the tie when
@@ -45,8 +45,8 @@ It's a compact form of the events that happened. If we were to fill in the dots,
 Each of those steps is a dot."))
 
 (-> dot (identifier:identifier &key (:counter counter) (:timestamp timestamp)) (values dot &optional))
-(defun dot (actor-id &key (counter 1) (timestamp nil timestamp-provided-p))
-  (make-instance 'dot :actor-id actor-id :counter counter :timestamp (or (and timestamp-provided-p timestamp) (clock:seconds-since-epoch))))
+(defun dot (actor-id &key (counter 1) (timestamp (clock:seconds-since-epoch)))
+  (make-instance 'dot :actor-id actor-id :counter counter :timestamp timestamp))
 
 (-> copy-dot (dot) dot)
 (defun copy-dot (given-dot)
@@ -209,7 +209,7 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
   (with-slots (history dot) dvv
     (make-dotted-version-vector
      :initial-history (copy-history history)
-     :initial-dot (copy-dot dot))))
+     :initial-dot (when dot (copy-dot dot)))))
 
 (-> dotted-version-vector= (dotted-version-vector dotted-version-vector) (values boolean &optional))
 (defun dotted-version-vector= (dvvA dvvB)
@@ -266,7 +266,7 @@ IMPORTANT: All `dvv's descent the empty `dvv' and also themselves.
       (let ((historyA (dotted-version-vector-history dvvA :merge-dot t))
             (historyB (dotted-version-vector-history dvvB :merge-dot t)))
         (every #'(lambda (dotB)
-                   (a:when-let ((dotA (find dotB :test #'dot-actor= historyA))) ; every dot in dvvB's history also exists in dvvA's history
+                   (a:when-let ((dotA (find dotB historyA :test #'dot-actor=))) ; every dot in dvvB's history also exists in dvvA's history
                      (dot-counter>= dotA dotB)))
                historyB)))) ; and also the dotA is >= than in dotB
 
@@ -282,8 +282,8 @@ IMPORTANT: All `dvv's descent the empty `dvv' and also themselves.
   "Returns `t' if `dvvA' strictly dominates `dvvB'."
   (and (descendsp dvvA dvvB) (not (descendsp dvvB dvvA))))
 
-(-> incf-actor (identifier:identifier dotted-version-vector) dotted-version-vector)
-(defun incf-actor (actor-id dvv)
+(-> incf-actor (dotted-version-vector identifier:identifier) dotted-version-vector)
+(defun incf-actor (dvv actor-id )
   "In-place update the `counter' for `actor-id' in `dvv'.
 If no such actor exists, it will be added with a counter value of 1.
 If it exists, it's counter will be incremented by 1 and its timestamp will be set to now.
@@ -293,7 +293,6 @@ If it exists, it's counter will be incremented by 1 and its timestamp will be se
           :when (identifier:identifier= actor-id (dot-actor-id dot))
             :do (incf-dot dot)
                 (return-from incf-actor dvv))
-    ;; TODO: doublecheck that this is correct. No history but single dot.
     (prog1 dvv
       (a:if-let ((existing-dot (slot-value dvv 'dot)))
         (incf-dot existing-dot)
