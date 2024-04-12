@@ -142,7 +142,8 @@ Examples
         :report "Leave the current API running"
         (return-from start-api)))
     (log:info "[~a] Starting on ~a" name listen-address)
-    (setf handler (clack:clackup app :address host :port port :server server))))
+    (with-slots (host port) listen-address
+      (setf handler (clack:clackup app :address host :port port :server server)))))
 
 (defun stop-api (api-endpoint)
   "Stops the api endpoint and removes all routes. It's safe to start the API again with the same object after calling this function."

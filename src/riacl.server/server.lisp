@@ -44,8 +44,9 @@
                                                   :cluster-manager cluster-manager
                                                   :data-api (api.data:make-data-api (cluster:cluster-node-id this-node))
                                                   :control-api (api.control:make-control-api (cluster:cluster-node-id this-node))))
-           (api:start-api data-api)
-           (api:start-api control-api)
+           (with-slots (data-api control-api) *server-instance*
+             (api:start-api data-api)
+             (api:start-api control-api))
            (log:info "[Server] All subsystems started. Cluster name: ~A" config:*cluster.name*)
            *server-instance*)
       (when *server-instance*
