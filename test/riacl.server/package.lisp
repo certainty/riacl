@@ -7,3 +7,7 @@
 (defpackage #:riacl.server.tests.cluster
   (:use :cl :lisp-unit2)
   (:local-nicknames (:a :alexandria) (:s :serapeum)))
+
+(defpackage #:riacl.server.tests.config
+  (:use :cl :lisp-unit2)
+  (:local-nicknames (:a :alexandria) (:s :serapeum)))

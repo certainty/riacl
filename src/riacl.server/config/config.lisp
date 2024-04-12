@@ -37,9 +37,7 @@
                      (message condition)))))
 
 (defun as-boolean (value)
-  (if (and (stringp value) (member value '("true" "t" "yes" "y" "1")))
-      t
-      nil))
+  (s:true (and (stringp value) (member value '("true" "t" "yes" "y" "1") :test #'string-equal))))
 
 (defun as-integer (value)
   (let ((parsed (parse-integer value :junk-allowed nil)))
@@ -48,9 +46,10 @@
         (error 'value-conversion-error :value value :message "Not an integer"))))
 
 (defun as-network-address (value)
-  (a:if-let ((addr (network:parse-address value)))
-    addr
-    (error 'value-conversion-error :value value :message "Not a network address")))
+  (let ((addr (network:parse-address value)))
+    (prog1 addr
+      (unless addr
+        (error 'value-conversion-error :value value :message "Not a network address")))))
 
 (defun as-comma-separated-of (type-fn)
   (lambda (value)

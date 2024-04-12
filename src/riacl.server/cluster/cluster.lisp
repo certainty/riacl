@@ -1,5 +1,6 @@
 (in-package :riacl.server.cluster)
 
+(s:defconst +state-version+ 1)
 (s:defconst +membership-state+ (list :joining :valid :invalid :leaving :exiting :down))
 
 (defun membership-state-p (state)
@@ -22,22 +23,21 @@
     :reader member-state
     :initarg :state
     :initform :invalid
-    :type membership-state))
-  (:documentation "A member of the cluster. This is the core of the membership protocol."))
+    :type membership-state)))
 
 (defclass state ()
   ((version
     :reader state-version
     :initarg :version
-    :initform 1
+    :initform +state-version+
     :type (integer 1 *))
-   (node
-    :reader state-name
-    :initarg :node-name
-    :initform (error "node-name is required")
+   (node-id
+    :reader state-node-id
+    :initarg :node-id
+    :initform (error "node-id is required")
     :type identifier:identifier)
-   (cluster
-    :reader state-cluster
+   (cluster-name
+    :reader state-cluster-name
     :initarg :cluster
     :initform (error "cluster-name is required")
     :type identifier:identifier)
@@ -57,3 +57,11 @@
     :initform (error "ring is required")
     :type ring:consistent-hash-ring))
   (:documentation "The state that represents the knowledge of a particular node about the cluster. This state is passed around in the cluster and is the core of the distributed state machine."))
+
+(defun serialize-state ()
+  "Serialize the state to be send over the wire"
+  t)
+
+(defun deserialize-state (&key (version +state-version+))
+  "Deserialize the state from the wire format"
+  t)

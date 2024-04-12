@@ -13,6 +13,6 @@
 (defun run-suites ()
   (push :test *features*)
   (with-env-specific-setup
-    (run-tests
-     :name "riacl.server.tests"
-     :package '(#:riacl.server.tests.cluster))))
+      (run-tests
+       :name "riacl.server.tests"
+       :package '(#:riacl.server.tests.cluster #:riacl.server.tests.config))))

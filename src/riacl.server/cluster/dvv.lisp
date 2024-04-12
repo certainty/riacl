@@ -28,13 +28,16 @@ Same as returned by `get-universal-time'."
     :initarg :counter
     :initform 1
     :type version
-    :documentation "The logical clock value of the event. It is strictly monotonically increasing.")
+    :documentation "The logical clock value of the event. It is a strictly monotonically increasing counter")
    (timestamp
     :reader dot-timestamp
     :initarg :timestamp
     :initform nil
     :type (or null timestamp)
-    :documentation "The wall clock time when the event happened. Which is useful for debugging, logging and representation to the client."))
+    :documentation
+    "The wall clock time when the event happened.
+     This is managed by the dotted-version vector and is used to break the tie when
+     `dots' are merged and have equal `counter's"))
   (:documentation
    "A dot represents a single discrete event that happened in the system.
 If you think about a traditional vector clock of let's say (A, 4), then this states that the sytem knows of 4 events by A.
@@ -68,39 +71,39 @@ Each of those steps is a dot."))
 
 (-> dot= (dot dot) boolean)
 (defun dot-actor= (dot1 dot2)
-  "Returns `t' if the actor-id of `dot1' is equal to the actor-id of `dot2', `nil' otherwise."
+  "Returns `t' if the `actor-id' of `dot1' is equal to the actor-id of `dot2', `nil' otherwise."
   (identifier:identifier= (dot-actor-id dot1) (dot-actor-id dot2)))
 
 (-> dot-counter= (dot dot) boolean)
 (defun dot-counter= (dot1 dot2)
-  "Returns `t' if the counter of `dot1' is equal to the counter of `dot2', `nil' otherwise."
+  "Returns `t' if the `counter' of `dot1' is equal to the counter of `dot2', `nil' otherwise."
   (= (dot-counter dot1) (dot-counter dot2)))
 
 (-> dot< (dot dot) boolean)
 (defun dot-counter< (dot1 dot2)
-  "Returns `t' if the counter of `dot1' is less than the counter of `dot2', `nil' otherwise.'"
+  "Returns `t' if the `counter' of `dot1' is less than the `counter' of `dot2', `nil' otherwise.'"
   (< (dot-counter dot1) (dot-counter dot2)))
 
 (-> dot> (dot dot) boolean)
 (defun dot-counter> (dot1 dot2)
-  "Returns `t' if the counter of `dot1' is greater than the counter of `dot2', `nil' otherwise."
+  "Returns `t' if the `counter' of `dot1' is greater than the `counter' of `dot2', `nil' otherwise."
   (> (dot-counter dot1) (dot-counter dot2)))
 
 (-> dot-counter<= (dot dot) boolean)
 (defun dot-counter<= (dot1 dot2)
-  "Returns `t' if the counter of `dot1' is less than or equal to the counter of `dot2', `nil' otherwise."
+  "Returns `t' if the `counter' of `dot1' is less than or equal to the `counter' of `dot2', `nil' otherwise."
   (s:true (or (dot-counter= dot1 dot2)
               (dot-counter< dot1 dot2))))
 
 (-> dot-counter>= (dot dot) boolean)
 (defun dot-counter>= (dot1 dot2)
-  "Returns `t' if the counter of `dot1' is greater than or equal to the counter of `dot2', `nil' otherwise."
+  "Returns `t' if the `counter' of `dot1' is greater than or equal to the `counter' of `dot2', `nil' otherwise."
   (s:true (or (dot-counter= dot1 dot2)
               (dot-counter> dot1 dot2))))
 
 (-> incf-dot ((or null dot)) (or null dot))
 (defun incf-dot (dot)
-  "Updates the dot by incrementing its counter and udjusting it's timestamp."
+  "Updates the `dot' by incrementing its `counter' and udjusting it's `counter'."
   (when dot
     (incf (slot-value dot 'counter))
     (setf (slot-value dot 'timestamp) (get-universal-time))))
@@ -110,7 +113,10 @@ Each of those steps is a dot."))
     :initarg :history
     :initform nil
     :type list
-    :documentation "The causal history as recorded in the version vector.")
+    :documentation
+    "The causal history as recorded in the version vector.
+     It's a list of `dots', which are managed by the utility functions for this class, so you should not need
+     to access this slot directly")
    (dot
     :reader dotted-version-vector-dot
     :initarg :dot
@@ -165,7 +171,7 @@ C1 <--- [ v1, (A,1) ] ---- A
 
 C1 stores the value v1 providing an empty context, meaning the client has no causal history of this value.
 This is recorded by the system and since the value didn't exist before, it's stored as {v1} ~ ([], (A,1)).
-This simply means, the value has an enpty version vector and the most recent dot is (A,1).
+This simply means, the value has an empty version vector and the most recent dot is (A,1).
 
 C2 --- [ v2, () ] ------> A
 
@@ -178,7 +184,7 @@ Now C1 issues an update, not knowing about the write that was done by C2 in the 
 In provides the causal history, that it is aware of as context (A,1).
 
 Now the system can do the following:
-1. it can discard {v1} ~ ([], (A,1)) because given the history, we know that C1 has knowledte about this event.
+1. it can discard {v1} ~ ([], (A,1)) because given the history, we know that C1 has knowledge about this event.
 2. it keeps {v2} ~ ([], (A,2)) because C1 obviously doesn't know about it
 3. it stores {v3} ~ ( [(A,1)], (A,3) ) to track the history of A in the version vector and record the most recent event.
 
@@ -253,7 +259,7 @@ Ref: http://gsd.di.uminho.pt/members/vff/dotted-version-vectors-2012.pdf
 `dvvA' is said to descend from `dvvB' if all of `dvvB's dots also exist in `dvvA' but with a counter that is greater or equal than the corresponding one in `dvvB'.
 In other words, it has seen more events from all the actors in `dvvB'.
 
-IMPORTANT: All `dvv's descent the empty `dvv' and itself.
+IMPORTANT: All `dvv's descent the empty `dvv' and also themselves.
  "
   (or (emptyp dvvB)
       (let ((historyA (dotted-version-vector-history dvvA :merge-dot t))
@@ -363,8 +369,7 @@ You should not have to use this function directly, but use `merge*' instead.
   "Merges two dots `a' and `b' and returns a new `dot' as a result of it.
 Dots are merged by applying the `max' over their counters.
 If both counters are equal, the `timestamp's to break the tiej
-The `actor-id' of both dots must be equal in terms of `identifier:identifier='
-  "
+The `actor-id' of both dots must be equal in terms of `identifier:identifier='"
   (assert (identifier:identifier= (dot-actor-id a) (dot-actor-id b)))
   (cond
     ((dot-counter> a b) a)
@@ -376,8 +381,7 @@ The `actor-id' of both dots must be equal in terms of `identifier:identifier='
 (-> merge-dot-to-history ((or null dot) list) list)
 (defun merge-dot-to-history (dot history)
   "Returns a new `history' which is the result of mergin `dot' into the provided `history'.
-The order of history is NOT preserved.
-"
+The order of history is NOT preserved."
   (if (null dot)
       history
       (let ((new-history (remove-if (lambda (item) (dot-actor= dot item)) history)))
