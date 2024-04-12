@@ -1,5 +1,4 @@
 (in-package :riacl.server.cluster.dvv)
-
 ;;; This is an implementation of dotted version vectors in Common Lisp.
 ;;; It's based on the erlang implementation here: https://github.com/ricardobcl/Dotted-Version-Vectors/blob/27fd1225c10a7dc4890e5e55abddf6db2392f6cc/src/dvv.erl
 ;;; Please refer to the class and method documentation for details.
@@ -39,7 +38,7 @@ Same as returned by `get-universal-time'."
   (:documentation
    "A dot represents a single discrete event that happened in the system.
 If you think about a traditional vector clock of let's say (A, 4), then this states that the sytem knows of 4 events by A.
-It's a compact form of the events that happened. If were to fill in the dots, that led to this vector clock, it would look like this: (A, 1), (A, 2), (A, 3), (A, 4).
+It's a compact form of the events that happened. If we were to fill in the dots, that led to this vector clock, it would look like this: (A, 1), (A, 2), (A, 3), (A, 4).
 Each of those steps is a dot."))
 
 (-> dot (identifier:identifier &key (:counter counter) (:timestamp timestamp)) (values dot &optional))
