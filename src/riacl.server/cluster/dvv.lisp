@@ -27,17 +27,14 @@ Same as returned by `get-universal-time'."
     :reader dot-counter
     :initarg :counter
     :initform 1
-    :type version
+    :type counter
     :documentation "The logical clock value of the event. It is a strictly monotonically increasing counter")
    (timestamp
     :reader dot-timestamp
     :initarg :timestamp
     :initform nil
-    :type (or null (integer 0 *))
-    :documentation
-    "The wall clock time when the event happened.
-     This is managed by the dotted-version vector and is used to break the tie when
-     `dots' are merged and have equal `counter's"))
+    :type (or null timestamp)
+    :documentation "The wall clock time when the event happened. Is maintained automatically by the system and is used to break ties in the logical clock."))
   (:documentation
    "A dot represents a single discrete event that happened in the system.
 If you think about a traditional vector clock of let's say (A, 4), then this states that the sytem knows of 4 events by A.
