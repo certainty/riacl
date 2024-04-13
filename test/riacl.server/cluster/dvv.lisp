@@ -25,11 +25,11 @@
 
 (define-test dot-equality ()
   "dot= works"
-  (let ((a (dvv:dot +vnode-1+ :counter 1 :timestamp 2))
-        (b (dvv:dot +vnode-1+ :counter 1 :timestamp 2))
-        (c (dvv:dot +vnode-2+ :counter 1 :timestamp 2))
-        (d (dvv:dot +vnode-1+ :counter 2 :timestamp 2))
-        (e (dvv:dot +vnode-1+ :counter 1 :timestamp 3)))
+  (let ((a (dvv:make-dot +vnode-1+ :counter 1 :timestamp 2))
+        (b (dvv:make-dot +vnode-1+ :counter 1 :timestamp 2))
+        (c (dvv:make-dot +vnode-2+ :counter 1 :timestamp 2))
+        (d (dvv:make-dot +vnode-1+ :counter 2 :timestamp 2))
+        (e (dvv:make-dot +vnode-1+ :counter 1 :timestamp 3)))
     (assert-true  (dvv:dot= a a) "Identical object")
     (assert-true  (dvv:dot= a b) "Same values")
     (assert-false (dvv:dot= a c) "Different actors => different dots")
@@ -38,7 +38,7 @@
 
 (define-test incf-dot-works ()
   (with-test-clock (clock 10)
-    (let ((subject (dvv:dot +vnode-1+ :counter 1 :timestamp 5)))
+    (let ((subject (dvv:make-dot +vnode-1+ :counter 1 :timestamp 5)))
       (dvv:incf-dot subject)
       (assert-equal 2 (dvv:dot-counter subject))
       (assert-equal 10 (dvv:dot-timestamp subject))
@@ -52,18 +52,18 @@
 (define-test descendsp-empty-clock ()
   (let ((empty (dvv:make-dotted-version-vector))
         (c1 (dvv:make-dotted-version-vector
-             :initial-history (list (dvv:dot +vnode-1+ :counter 1 :timestamp 1))))
+             :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1))))
         (c2 (dvv:make-dotted-version-vector
-             :initial-dot (dvv:dot +vnode-1+ :counter 2 :timestamp 2))))
+             :initial-dot (dvv:make-dot +vnode-1+ :counter 2 :timestamp 2))))
 
     (assert-true (dvv:descendsp c1 empty))
     (assert-true (dvv:descendsp c2 empty))))
 
 (define-test descendsp-self ()
   (let ((c1 (dvv:make-dotted-version-vector
-             :initial-history (list (dvv:dot +vnode-1+ :counter 1 :timestamp 1))))
+             :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1))))
         (c2 (dvv:make-dotted-version-vector
-             :initial-dot (dvv:dot +vnode-1+ :counter 2 :timestamp 2))))
+             :initial-dot (dvv:make-dot +vnode-1+ :counter 2 :timestamp 2))))
     (assert-true (dvv:descendsp c1 c1))
     (assert-true (dvv:descendsp c2 c2))))
 
@@ -79,13 +79,13 @@
 (define-test merge-works ()
   (let* ((c1 (dvv:make-dotted-version-vector
               :initial-history (list
-                                (dvv:dot +vnode-1+ :counter 1 :timestamp 1)
-                                (dvv:dot +vnode-2+ :counter 2 :timestamp 2))
-              :initial-dot (dvv:dot +vnode-4+ :counter 4 :timestamp 4)))
+                                (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)
+                                (dvv:make-dot +vnode-2+ :counter 2 :timestamp 2))
+              :initial-dot (dvv:make-dot +vnode-4+ :counter 4 :timestamp 4)))
          (c2 (dvv:make-dotted-version-vector
               :initial-history (list
-                                (dvv:dot +vnode-3+ :counter 3 :timestamp 3)
-                                (dvv:dot +vnode-4+ :counter 3 :timestamp 3)))))
+                                (dvv:make-dot +vnode-3+ :counter 3 :timestamp 3)
+                                (dvv:make-dot +vnode-4+ :counter 3 :timestamp 3)))))
 
     (assert-true (dvv:emptyp (dvv:merge* (dvv:make-dotted-version-vector))) "Fresh dvv merges to empty dvv")
 
@@ -103,10 +103,10 @@
          history)))))
 
 (define-test merge-less-left ()
-  (let* ((c1 (dvv:make-dotted-version-vector :initial-dot (dvv:dot +vnode-1+ :counter 1 :timestamp 1)))
+  (let* ((c1 (dvv:make-dotted-version-vector :initial-dot (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)))
          (c2 (dvv:make-dotted-version-vector :initial-history
-                                             (list (dvv:dot +vnode-2+ :counter 2 :timestamp 2))
-                                             :initial-dot (dvv:dot +vnode-3+ :counter 3 :timestamp 3)))
+                                             (list (dvv:make-dot +vnode-2+ :counter 2 :timestamp 2))
+                                             :initial-dot (dvv:make-dot +vnode-3+ :counter 3 :timestamp 3)))
          (c1+c2 (dvv:merge* c1 c2)))
     (assert-true (null (dvv:dotted-version-vector-dot c1+c2)))
     (assert-equal
@@ -116,9 +116,9 @@
      (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
 
 (define-test merge-less-right ()
-  (let* ((c1 (dvv:make-dotted-version-vector :initial-history (list (dvv:dot +vnode-2+ :counter 2 :timestamp 2))
-                                             :initial-dot (dvv:dot +vnode-3+ :counter 3 :timestamp 3)))
-         (c2 (dvv:make-dotted-version-vector :initial-dot (dvv:dot +vnode-1+ :counter 1 :timestamp 1)))
+  (let* ((c1 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-2+ :counter 2 :timestamp 2))
+                                             :initial-dot (dvv:make-dot +vnode-3+ :counter 3 :timestamp 3)))
+         (c2 (dvv:make-dotted-version-vector :initial-dot (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)))
          (c1+c2 (dvv:merge* c1 c2)))
     (assert-true (null (dvv:dotted-version-vector-dot c1+c2)))
     (assert-equal
@@ -128,10 +128,10 @@
      (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
 
 (define-test merge-same-id ()
-  (let* ((c1 (dvv:make-dotted-version-vector :initial-history (list (dvv:dot +vnode-1+ :counter 1 :timestamp 2))
-                                             :initial-dot (dvv:dot +vnode-2+ :counter 1 :timestamp 4)))
-         (c2 (dvv:make-dotted-version-vector :initial-history (list (dvv:dot +vnode-1+ :counter 1 :timestamp 3))
-                                             :initial-dot (dvv:dot +vnode-3+ :counter 1 :timestamp 5)))
+  (let* ((c1 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 2))
+                                             :initial-dot (dvv:make-dot +vnode-2+ :counter 1 :timestamp 4)))
+         (c2 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 3))
+                                             :initial-dot (dvv:make-dot +vnode-3+ :counter 1 :timestamp 5)))
          (c1+c2 (dvv:merge* c1 c2)))
     (assert-true (null (dvv:dotted-version-vector-dot c1+c2)))
     (assert-equal

@@ -35,7 +35,7 @@
   (:shadow :merge)
   (:export
    #:counter
-   #:dot
+   #:make-dot
    #:copy-dot
    #:dot=
    #:dot-actor-id

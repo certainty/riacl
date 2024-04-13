@@ -44,18 +44,18 @@ If you think about a traditional vector clock of let's say (A, 4), then this sta
 It's a compact form of the events that happened. If we were to fill in the dots, that led to this vector clock, it would look like this: (A, 1), (A, 2), (A, 3), (A, 4).
 Each of those steps is a dot."))
 
-(-> dot (identifier:identifier &key (:counter counter) (:timestamp timestamp)) (values dot &optional))
-(defun dot (actor-id &key (counter 1) (timestamp (clock:seconds-since-epoch)))
+(-> make-dot (identifier:identifier &key (:counter counter) (:timestamp timestamp)) (values dot &optional))
+(defun make-dot (actor-id &key (counter 1) (timestamp (clock:seconds-since-epoch)))
   (make-instance 'dot :actor-id actor-id :counter counter :timestamp timestamp))
 
 (-> copy-dot (dot) dot)
 (defun copy-dot (given-dot)
   "Create a copy of `given-dot'"
   (with-slots (actor-id counter timestamp) given-dot
-    (dot actor-id :counter counter :timestamp timestamp)))
+    (make-dot actor-id :counter counter :timestamp timestamp)))
 
 (defmethod print-object ((dot dot) stream)
-  (print-unreadable-object (dot stream :type t :identity t)
+  (print-unreadable-object (make-dot stream :type t :identity t)
     (format stream "actor-id: ~A counter: ~A timestamp: ~A" (dot-actor-id dot) (dot-counter dot) (dot-timestamp dot))))
 
 (defmethod prelude:to-plist ((dot dot))
@@ -296,7 +296,7 @@ If it exists, it's counter will be incremented by 1 and its timestamp will be se
     (prog1 dvv
       (a:if-let ((existing-dot (slot-value dvv 'dot)))
         (incf-dot existing-dot)
-        (push (dot actor-id :counter 1) history)))))
+        (push (make-dot actor-id :counter 1) history)))))
 
 (-> actor-id-set (dotted-version-vector) list)
 (defun actor-id-set (dvv)
@@ -374,9 +374,9 @@ The `actor-id' of both dots must be equal in terms of `identifier:identifier='"
   (cond
     ((dot-counter> a b) a)
     ((dot-counter< a b) b)
-    (t (dot (dot-actor-id a)
-            :counter (dot-counter a)
-            :timestamp (max (dot-timestamp a) (dot-timestamp b))))))
+    (t (make-dot(dot-actor-id a)
+                :counter (dot-counter a)
+                :timestamp (max (dot-timestamp a) (dot-timestamp b))))))
 
 (-> merge-dot-to-history ((or null dot) list) list)
 (defun merge-dot-to-history (dot history)
