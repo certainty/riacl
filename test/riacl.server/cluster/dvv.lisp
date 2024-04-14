@@ -1,4 +1,6 @@
-(in-package :riacl.server.tests.cluster)
+(in-package :riacl.server.tests)
+
+(define-test dvv-suite)
 
 (defclass test-clock ()
   ((seconds
@@ -23,60 +25,62 @@
 (serapeum:defconst +vnode-4+ "urn:x-riacl:10:a:4")
 (serapeum:defconst +vnode-5+ "urn:x-riacl:10:a:5")
 
-(define-test dot-equality ()
-  "dot= works"
+(define-test dot-equality :parent dvv-suite
   (let ((a (dvv:make-dot +vnode-1+ :counter 1 :timestamp 2))
         (b (dvv:make-dot +vnode-1+ :counter 1 :timestamp 2))
         (c (dvv:make-dot +vnode-2+ :counter 1 :timestamp 2))
         (d (dvv:make-dot +vnode-1+ :counter 2 :timestamp 2))
         (e (dvv:make-dot +vnode-1+ :counter 1 :timestamp 3)))
-    (assert-true  (dvv:dot= a a) "Identical object")
-    (assert-true  (dvv:dot= a b) "Same values")
-    (assert-false (dvv:dot= a c) "Different actors => different dots")
-    (assert-false (dvv:dot= a d) "Different counter => different dots")
-    (assert-false (dvv:dot= a e) "Different timestamp => different dots")))
+    (true  (dvv:dot= a a) "Identical object")
+    (true  (dvv:dot= a b) "Same values")
+    (false (dvv:dot= a c) "Different actors => different dots")
+    (false (dvv:dot= a d) "Different counter => different dots")
+    (false (dvv:dot= a e) "Different timestamp => different dots")))
 
-(define-test incf-dot-works ()
+(define-test incf-dot-works :parent dvv-suite
   (with-test-clock (clock 10)
     (let ((subject (dvv:make-dot +vnode-1+ :counter 1 :timestamp 5)))
       (dvv:incf-dot subject)
-      (assert-equal 2 (dvv:dot-counter subject))
-      (assert-equal 10 (dvv:dot-timestamp subject))
+      (is = 2 (dvv:dot-counter subject))
+      (is = 10 (dvv:dot-timestamp subject))
 
       (advance-clock clock 10)
       (dvv:incf-dot subject)
 
-      (assert-equal 3 (dvv:dot-counter subject))
-      (assert-equal 20 (dvv:dot-timestamp subject)))))
+      (is = 3 (dvv:dot-counter subject))
+      (is = 20 (dvv:dot-timestamp subject)))))
 
-(define-test descendsp-empty-clock ()
+(define-test descendsp-empty-clock :parent dvv-suite
   (let ((empty (dvv:make-dotted-version-vector))
         (c1 (dvv:make-dotted-version-vector
              :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1))))
         (c2 (dvv:make-dotted-version-vector
              :initial-dot (dvv:make-dot +vnode-1+ :counter 2 :timestamp 2))))
 
-    (assert-true (dvv:descendsp c1 empty))
-    (assert-true (dvv:descendsp c2 empty))))
+    (true (dvv:descendsp c1 empty))
+    (true (dvv:descendsp c2 empty))))
 
-(define-test descendsp-self ()
+(define-test descendsp-self
+  :parent dvv-suite
   (let ((c1 (dvv:make-dotted-version-vector
              :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1))))
         (c2 (dvv:make-dotted-version-vector
              :initial-dot (dvv:make-dot +vnode-1+ :counter 2 :timestamp 2))))
-    (assert-true (dvv:descendsp c1 c1))
-    (assert-true (dvv:descendsp c2 c2))))
+    (true (dvv:descendsp c1 c1))
+    (true (dvv:descendsp c2 c2))))
 
-(define-test descendsp ()
+(define-test descendsp
+  :parent dvv-suite
   (let ((c1 (dvv:make-dotted-version-vector)))
     (dvv:incf-actor c1 +vnode-1+)
     (dvv:incf-actor c1 +vnode-3+)
     (let ((c2 (dvv:copy-dotted-version-vector c1)))
       (dvv:incf-actor c2 +vnode-2+) ; actor vnode-2 only exists in c2
       (dvv:incf-actor c2 +vnode-1+)
-      (assert-true (dvv:descendsp c2 c1)))))
+      (true (dvv:descendsp c2 c1)))))
 
-(define-test merge-works ()
+(define-test merge-works
+  :parent dvv-suite
   (let* ((c1 (dvv:make-dotted-version-vector
               :initial-history (list
                                 (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)
@@ -87,55 +91,58 @@
                                 (dvv:make-dot +vnode-3+ :counter 3 :timestamp 3)
                                 (dvv:make-dot +vnode-4+ :counter 3 :timestamp 3)))))
 
-    (assert-true (dvv:emptyp (dvv:merge* (dvv:make-dotted-version-vector))) "Fresh dvv merges to empty dvv")
+    (true (dvv:emptyp (dvv:merge* (dvv:make-dotted-version-vector))) "Fresh dvv merges to empty dvv")
 
     (let ((c1-merged-with-c2 (dvv:merge* c1 c2)))
-      (assert-true (null (dvv:dotted-version-vector-dot c1-merged-with-c2)))
+      (true (null (dvv:dotted-version-vector-dot c1-merged-with-c2)))
 
       (let ((history (mapcar #'prelude:to-plist
                              (dvv:dotted-version-vector-history-sorted c1-merged-with-c2))))
-        (assert-equal
-         `((:actor-id ,+vnode-1+ :counter 1 :timestamp 1)
-           (:actor-id ,+vnode-2+ :counter 2 :timestamp 2)
-           (:actor-id ,+vnode-3+ :counter 3 :timestamp 3)
-           ;; event 3 3 is removed for vnode-4
-           (:actor-id ,+vnode-4+ :counter 4 :timestamp 4))
-         history)))))
+        (is equal
+            `((:actor-id ,+vnode-1+ :counter 1 :timestamp 1)
+              (:actor-id ,+vnode-2+ :counter 2 :timestamp 2)
+              (:actor-id ,+vnode-3+ :counter 3 :timestamp 3)
+              ;; event 3 3 is removed for vnode-4
+              (:actor-id ,+vnode-4+ :counter 4 :timestamp 4))
+            history)))))
 
-(define-test merge-less-left ()
+(define-test merge-less-left
+  :parent dvv-suite
   (let* ((c1 (dvv:make-dotted-version-vector :initial-dot (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)))
          (c2 (dvv:make-dotted-version-vector :initial-history
                                              (list (dvv:make-dot +vnode-2+ :counter 2 :timestamp 2))
                                              :initial-dot (dvv:make-dot +vnode-3+ :counter 3 :timestamp 3)))
          (c1+c2 (dvv:merge* c1 c2)))
-    (assert-true (null (dvv:dotted-version-vector-dot c1+c2)))
-    (assert-equal
-     `((:actor-id ,+vnode-1+ :counter 1 :timestamp 1)
-       (:actor-id ,+vnode-2+ :counter 2 :timestamp 2)
-       (:actor-id ,+vnode-3+ :counter 3 :timestamp 3))
-     (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
+    (true (null (dvv:dotted-version-vector-dot c1+c2)))
+    (is equal
+        `((:actor-id ,+vnode-1+ :counter 1 :timestamp 1)
+          (:actor-id ,+vnode-2+ :counter 2 :timestamp 2)
+          (:actor-id ,+vnode-3+ :counter 3 :timestamp 3))
+        (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
 
-(define-test merge-less-right ()
+(define-test merge-less-right
+  :parent dvv-suite
   (let* ((c1 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-2+ :counter 2 :timestamp 2))
                                              :initial-dot (dvv:make-dot +vnode-3+ :counter 3 :timestamp 3)))
          (c2 (dvv:make-dotted-version-vector :initial-dot (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)))
          (c1+c2 (dvv:merge* c1 c2)))
-    (assert-true (null (dvv:dotted-version-vector-dot c1+c2)))
-    (assert-equal
-     `((:actor-id ,+vnode-1+ :counter 1 :timestamp 1)
-       (:actor-id ,+vnode-2+ :counter 2 :timestamp 2)
-       (:actor-id ,+vnode-3+ :counter 3 :timestamp 3))
-     (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
+    (true (null (dvv:dotted-version-vector-dot c1+c2)))
+    (is equal
+        `((:actor-id ,+vnode-1+ :counter 1 :timestamp 1)
+          (:actor-id ,+vnode-2+ :counter 2 :timestamp 2)
+          (:actor-id ,+vnode-3+ :counter 3 :timestamp 3))
+        (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
 
-(define-test merge-same-id ()
+(define-test merge-same-id
+  :parent dvv-suite
   (let* ((c1 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 2))
                                              :initial-dot (dvv:make-dot +vnode-2+ :counter 1 :timestamp 4)))
          (c2 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 3))
                                              :initial-dot (dvv:make-dot +vnode-3+ :counter 1 :timestamp 5)))
          (c1+c2 (dvv:merge* c1 c2)))
-    (assert-true (null (dvv:dotted-version-vector-dot c1+c2)))
-    (assert-equal
-     `((:actor-id ,+vnode-1+ :counter 1 :timestamp 3)
-       (:actor-id ,+vnode-2+ :counter 1 :timestamp 4)
-       (:actor-id ,+vnode-3+ :counter 1 :timestamp 5))
-     (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
+    (true (null (dvv:dotted-version-vector-dot c1+c2)))
+    (is equal
+        `((:actor-id ,+vnode-1+ :counter 1 :timestamp 3)
+          (:actor-id ,+vnode-2+ :counter 1 :timestamp 4)
+          (:actor-id ,+vnode-3+ :counter 1 :timestamp 5))
+        (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))

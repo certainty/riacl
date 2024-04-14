@@ -1,13 +1,6 @@
 (in-package :cl-user)
 
 (defpackage #:riacl.server.tests
-  (:use :cl :lisp-unit2)
+  (:use :cl :parachute)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
   (:export #:run-suites))
-
-(defpackage #:riacl.server.tests.cluster
-  (:use :cl :lisp-unit2)
-  (:local-nicknames (:a :alexandria) (:s :serapeum)))
-
-(defpackage #:riacl.server.tests.config
-  (:use :cl :lisp-unit2)
-  (:local-nicknames (:a :alexandria) (:s :serapeum)))

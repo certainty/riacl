@@ -5,7 +5,7 @@
   :version "0.1.0"
   :author "David Krentzlin <david.krentzlin@gmail.com>"
   :source-control (:git "https://github.com/certainty/riacl.git")
-  :depends-on (#:riacl/server #:riacl/client))
+  :depends-on (#:riacl/server #:riacl/client #:riacl/server.tests))
 
 (defsystem "riacl/server"
   :description "A riak inspired distributed key-value store in Common Lisp."
@@ -85,11 +85,14 @@
 
 (defsystem "riacl/server.tests"
   :description "Unit tests for riacl/server"
-  :depends-on (#:lisp-unit2  #:riacl/server)
+  :depends-on (#:parachute #:riacl/server)
   :pathname "test/riacl.server"
   :components
   ((:file "package")
    (:file "runner")
+   (:module "config"
+    :components
+    ((:file "config")))
    (:module "cluster"
     :components
     ((:file "identifier")
@@ -114,7 +117,7 @@
 
 (defsystem "riacl/common.tests"
   :description "Unit tests for riacl/common"
-  :depends-on (#:lisp-unit2  #:riacl/common)
+  :depends-on (#:parachute  #:riacl/common)
   :pathname "test/riacl.common"
   :components
   ((:file "package")
@@ -137,7 +140,7 @@
 
 (defsystem "riacl/client.tests"
   :description "Unit tests for riacl/client"
-  :depends-on (#:lisp-unit2  #:riacl/client)
+  :depends-on (#:parachute  #:riacl/client)
   :pathname "test/riacl.client"
   :components
   ((:file "package")
