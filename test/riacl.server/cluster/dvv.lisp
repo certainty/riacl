@@ -61,7 +61,7 @@
     (true (dvv:descendsp c2 empty))))
 
 (define-test descendsp-self
-    :parent dvv-suite
+  :parent dvv-suite
   (let ((c1 (dvv:make-dotted-version-vector
              :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1))))
         (c2 (dvv:make-dotted-version-vector
@@ -70,7 +70,7 @@
     (true (dvv:descendsp c2 c2))))
 
 (define-test descendsp
-    :parent dvv-suite
+  :parent dvv-suite
   (let ((c1 (dvv:make-dotted-version-vector)))
     (dvv:incf-actor c1 +vnode-1+)
     (dvv:incf-actor c1 +vnode-3+)
@@ -80,7 +80,7 @@
       (true (dvv:descendsp c2 c1)))))
 
 (define-test merge-works
-    :parent dvv-suite
+  :parent dvv-suite
   (let* ((c1 (dvv:make-dotted-version-vector
               :initial-history (list
                                 (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)
@@ -107,7 +107,7 @@
             history)))))
 
 (define-test merge-less-left
-    :parent dvv-suite
+  :parent dvv-suite
   (let* ((c1 (dvv:make-dotted-version-vector :initial-dot (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)))
          (c2 (dvv:make-dotted-version-vector :initial-history
                                              (list (dvv:make-dot +vnode-2+ :counter 2 :timestamp 2))
@@ -121,7 +121,7 @@
         (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
 
 (define-test merge-less-right
-    :parent dvv-suite
+  :parent dvv-suite
   (let* ((c1 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-2+ :counter 2 :timestamp 2))
                                              :initial-dot (dvv:make-dot +vnode-3+ :counter 3 :timestamp 3)))
          (c2 (dvv:make-dotted-version-vector :initial-dot (dvv:make-dot +vnode-1+ :counter 1 :timestamp 1)))
@@ -134,7 +134,7 @@
         (mapcar #'prelude:to-plist (dvv:dotted-version-vector-history-sorted c1+c2)))))
 
 (define-test merge-same-id
-    :parent dvv-suite
+  :parent dvv-suite
   (let* ((c1 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 2))
                                              :initial-dot (dvv:make-dot +vnode-2+ :counter 1 :timestamp 4)))
          (c2 (dvv:make-dotted-version-vector :initial-history (list (dvv:make-dot +vnode-1+ :counter 1 :timestamp 3))
