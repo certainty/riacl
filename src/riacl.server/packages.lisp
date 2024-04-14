@@ -1,5 +1,29 @@
 (in-package :cl-user)
 
+(defpackage #:riacl.clock
+  (:use :cl)
+  (:nicknames :clock)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export #:seconds-since-epoch #:seconds-since-epoch/impl #:*universal-clock*))
+
+(defpackage #:riacl.server.config
+  (:use :cl)
+  (:nicknames :server.config :config)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export
+   #:load-config
+   #:network-host
+   #:network-port
+   #:*api.control.listen-address*
+   #:*api.data.listen-address*
+   #:*control.seed-nodes*
+   #:*storage.backend*
+   #:*cluster.name*
+   #:*cluster.node-id*
+   #:*log.level*))
+
 (defpackage #:riacl.server.cluster.identifier
   (:use :cl #:riacl.prelude)
   (:nicknames :cluster.identifiers :identifier)
@@ -92,3 +116,58 @@
    #:cluster-seed-nodes
    #:cluster-local-node
    #:make-cluster-state))
+
+(defpackage #:riacl.server.api.foundation
+  (:use :cl)
+  (:nicknames :api.foundation :api)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export
+   #:start-api
+   #:stop-api
+   #:api-endpoint
+   #:api-handler
+   #:api-name
+   #:api-list-address
+   #:make-api-endpoint
+   #:add-route
+   #:add-routes
+   #:get-request-header
+   #:register-encoder
+   #:encode-content
+   #:json-encoder
+   #:msgpack-encoder
+   #:respond-with
+   #:respond-with-error))
+
+(defpackage #:riacl.server.api.data
+  (:use :cl)
+  (:nicknames :api.data)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export #:data-api #:make-data-api))
+
+(defpackage #:riacl.server.api.control
+  (:use :cl)
+  (:nicknames :api.control)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export #:control-api #:make-control-api))
+
+(defpackage #:riacl.server.data
+  (:use :cl)
+  (:nicknames :data)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->))
+
+(defpackage #:riacl.server
+  (:use :cl)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export #:start-server #:stop-server))
+
+(defpackage #:riacl.server.cli
+  (:use :cl)
+  (:local-nicknames (:a :alexandria) (:s :serapeum))
+  (:import-from :serapeum :->)
+  (:export #:main))
