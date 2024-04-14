@@ -43,52 +43,42 @@
   :pathname "src/riacl.server"
   :serial t
   :components
-  ((:file "package")
+  ((:file "packages")
    (:file "clock")
    (:module "config"
     :components
-    ((:file "package")
-     (:file "config")))
+    ((:file "config")))
 
    (:module "cluster"
     :components
-    ((:file "package")
-     (:file "identifiers")
+    ((:file "identifiers")
      (:file "dvv")
      (:file "cluster")
      (:file "manager")))
 
-   (:module "data"
-    :components
-    ((:file "package")))
-
    (:module "api"
     :components
-    ((:file "package")
-     (:file "foundation")))
+    ((:file "foundation")))
 
    (:module "api/data"
     :components
-    ((:file "package")
-     (:file "api")))
+    ((:file "api")))
 
    (:module "api/control"
     :components
-    ((:file "package")
-     (:file "api")))
+    ((:file "api")))
 
    (:file "server")
    (:module "cli"
     :components
-    ((:file "package")
-     (:file "main")))))
+    ((:file "main")))))
 
 (defsystem "riacl/server.tests"
   :description "Unit tests for riacl/server"
   :depends-on (#:parachute #:riacl/server)
   :pathname "test/riacl.server"
   :components
-  ((:file "package")
+  ((:file "packages")
    (:file "runner")
    (:module "config"
     :components
@@ -111,7 +101,7 @@
   :pathname "src/riacl.common"
   :in-order-to ((test-op (test-op "riacl/common.tests")))
   :components
-  ((:file "package")
+  ((:file "packages")
    (:file "prelude")
    (:file "network")))
 
@@ -120,7 +110,7 @@
   :depends-on (#:parachute  #:riacl/common)
   :pathname "test/riacl.common"
   :components
-  ((:file "package")
+  ((:file "packages")
    (:file "runner")
    (:file "network"))
   :perform (test-op (o c)
@@ -136,14 +126,14 @@
   :pathname "src/riacl.client"
   :serial t
   :components
-  ((:file "package")))
+  ((:file "packages")))
 
 (defsystem "riacl/client.tests"
   :description "Unit tests for riacl/client"
   :depends-on (#:parachute  #:riacl/client)
   :pathname "test/riacl.client"
   :components
-  ((:file "package")
+  ((:file "packages")
    (:file "runner"))
   :perform (test-op (o c)
                     (declare (ignore o c))
