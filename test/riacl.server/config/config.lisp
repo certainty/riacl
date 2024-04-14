@@ -1,7 +1,9 @@
-(in-package :riacl.server.tests.config)
+(in-package :riacl.server.tests)
 
-(define-test as-boolean-works ()
-  (assert-true (config::as-boolean "yes"))
-  (assert-true (config::as-boolean "1"))
-  (assert-true (config::as-boolean "true"))
-  (assert-false (config::as-boolean "false")))
+(define-test config-tests)
+
+(define-test as-boolean-works :parent config-tests
+  (true (config::as-boolean "yes"))
+  (true (config::as-boolean "1"))
+  (true (config::as-boolean "true"))
+  (false (config::as-boolean "false")))

@@ -1,18 +1,9 @@
 (in-package #:riacl.server.tests)
 
-(defmacro with-env-specific-setup (&body body)
-  (let ((db (gensym)))
-    `(if (uiop:getenvp "CI_ENV")
-         (let ((*debugger-hook*))
-           (let ((,db (with-summary () ,@body)))
-             (unless (and (null (lisp-unit2::failed-assertions ,db))
-                          (null (errors ,db)))
-               (uiop:quit 1))))
-         (with-summary () ,@body))))
-
 (defun run-suites ()
   (push :test *features*)
-  (with-env-specific-setup
-      (run-tests
-       :name "riacl.server.tests"
-       :package '(#:riacl.server.tests.cluster #:riacl.server.tests.config))))
+  (if (uiop:getenvp "CI_ENV")
+      (progn
+        (defvar cl-user::*exit-on-test-failures* t)
+        (parachute:test :riacl.server.tests :report 'plain))
+      (parachute:test :riacl.server.tests :report 'interactive)))
