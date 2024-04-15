@@ -50,6 +50,28 @@
       (is = 3 (dvv:dot-counter subject))
       (is = 20 (dvv:dot-timestamp subject)))))
 
+(define-test incf-actor-works :parent dvv-suite
+  (with-test-clock (clock 10)
+    (let ((subject (dvv:make-dotted-version-vector)))
+      ;; empty dvv
+      (dvv:incf-actor subject +vnode-1+)
+      (true (null (dvv:dotted-version-vector-history subject)))
+      (is identifier:identifier= +vnode-1+ (dvv:dot-actor-id (dvv:dotted-version-vector-dot subject)))
+      (is = 1 (dvv:dot-counter (dvv:dotted-version-vector-dot subject)))
+
+      (dvv:incf-actor subject +vnode-2+)
+      (is = 1 (length (dvv:dotted-version-vector-history subject)))
+      (true (dvv:dotted-version-vector-dot subject))
+
+      (is identifier:identifier= +vnode-2+ (dvv:dot-actor-id (dvv:dotted-version-vector-dot subject)))
+      (is = 1 (dvv:dot-counter (dvv:dotted-version-vector-dot subject)))
+
+
+      (dvv:incf-actor subject +vnode-1+)
+      (is = 2 (length (dvv:dotted-version-vector-history subject)))
+      (is identifier:identifier= +vnode-1+ (dvv:dot-actor-id (dvv:dotted-version-vector-dot subject)))
+      (is = 2 (dvv:dot-counter (dvv:dotted-version-vector-dot subject))))))
+
 (define-test descendsp-empty-clock :parent dvv-suite
   (let ((empty (dvv:make-dotted-version-vector))
         (c1 (dvv:make-dotted-version-vector

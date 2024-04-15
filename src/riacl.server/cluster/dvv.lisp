@@ -52,7 +52,7 @@ Each of those steps is a dot."))
     (make-dot actor-id :counter counter :timestamp timestamp)))
 
 (defmethod print-object ((dot dot) stream)
-  (print-unreadable-object (make-dot stream :type t :identity t)
+  (print-unreadable-object (dot stream :type t :identity t)
     (format stream "actor-id: ~A counter: ~A timestamp: ~A" (dot-actor-id dot) (dot-counter dot) (dot-timestamp dot))))
 
 (defmethod prelude:to-plist ((dot dot))
@@ -280,20 +280,25 @@ IMPORTANT: All `dvv's descent the empty `dvv' and also themselves.
   (and (descendsp dvvA dvvB) (not (descendsp dvvB dvvA))))
 
 (-> incf-actor (dotted-version-vector identifier:identifier) dotted-version-vector)
-(defun incf-actor (dvv actor-id )
+(defun incf-actor (dvv actor-id)
   "In-place update the `counter' for `actor-id' in `dvv'.
 If no such actor exists, it will be added with a counter value of 1.
 If it exists, it's counter will be incremented by 1 and its timestamp will be set to now.
 "
-  (with-slots (history) dvv
-    (loop :for dot :in history
-          :when (identifier:identifier= actor-id (dot-actor-id dot))
-            :do (incf-dot dot)
-                (return-from incf-actor dvv))
-    (prog1 dvv
-      (a:if-let ((existing-dot (slot-value dvv 'dot)))
-        (incf-dot existing-dot)
-        (push (make-dot actor-id :counter 1) history)))))
+  (prog1 dvv
+    (with-slots (history dot) dvv
+      (let ((full-history (dotted-version-vector-history dvv :merge-dot t)))
+        (setf history full-history)
+        (a:if-let ((existing-dot (find actor-id full-history :key #'dot-actor-id :test #'identifier:identifier=)))
+          (setf dot (incf-dot (copy-dot existing-dot)))
+          (setf dot (make-dot actor-id)))))))
+
+
+(-> history-dot-ref (dotted-version-vector identifier:identifier &key (:merge-dot boolean)) (or null dot))
+(defun history-dot-ref (dvv actor-id &key (merge-dot t))
+  "Return the dot for `actor-id' if it exists in `dvv's history or `nil' otherwise."
+  (let ((history (dotted-version-vector-history dvv :merge-dot merge-dot)))
+    (find actor-id history :key #'dot-actor-id :test #'identifier:identifier=)))
 
 (-> actor-id-set (dotted-version-vector) list)
 (defun actor-id-set (dvv)
