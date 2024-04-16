@@ -16,13 +16,20 @@
    #:load-config
    #:network-host
    #:network-port
-   #:*api.control.listen-address*
-   #:*api.data.listen-address*
-   #:*control.seed-nodes*
-   #:*storage.backend*
-   #:*cluster.name*
-   #:*cluster.node-id*
-   #:*log.level*))
+
+   #:log.level
+   #:cluster.name
+   #:cluster.node-id
+   #:cluster.members
+
+   #:bucket.default.read-quorum
+   #:bucket.default.write-quorum
+   #:bucket.default.replicas
+   #:bucket.default.conflict-resolution
+
+   #:api.control.listen-address
+   #:api.data.listen-address
+   #:storage.backend))
 
 (defpackage #:riacl.server.cluster.identifier
   (:use :cl #:riacl.prelude)
@@ -49,7 +56,8 @@
   (:local-nicknames (:a :alexandria) (:s :serapeum))
   (:import-from :serapeum :->)
   (:export
-   #:consistent-hash-ring))
+   #:consistent-hash-ring
+   #:make-ring))
 
 (defpackage #:riacl.server.cluster.dvv
   (:use :cl)
@@ -115,7 +123,10 @@
    #:cluster-known-nodes
    #:cluster-seed-nodes
    #:cluster-local-node
-   #:make-cluster-state))
+   #:make-cluster-state
+   #:make-state
+   #:make-manager
+   #:node-id))
 
 (defpackage #:riacl.server.api.foundation
   (:use :cl)

@@ -26,7 +26,7 @@
              (format stream "Server ~A is already started." (server condition)))))
 
 (defun setup-logging ()
-  (log:config :file2 :ndc config:*log.level*))
+  (log:config :file2 :ndc (config:log.level)))
 
 (defun start-server ()
   "Start the server node. It will reload the configuration, initialize all subsystems and begin listening for incoming connections."
@@ -38,16 +38,15 @@
     (config:load-config)
     (setup-logging)
     (unwind-protect
-         (let* ((cluster-manager (cluster:manager-for config:*cluster.name*))
-                (this-node (cluster:join-this-node cluster-manager)))
+         (let* ((cluster-manager (cluster:make-manager)))
            (setf *server-instance* (make-instance 'server
                                                   :cluster-manager cluster-manager
-                                                  :data-api (api.data:make-data-api (cluster:cluster-node-id this-node))
-                                                  :control-api (api.control:make-control-api (cluster:cluster-node-id this-node))))
+                                                  :data-api (api.data:make-data-api (cluster:node-id manager))
+                                                  :control-api (api.control:make-control-api (cluster:node-id manager))))
            (with-slots (data-api control-api) *server-instance*
              (api:start-api data-api)
              (api:start-api control-api))
-           (log:info "[Server] All subsystems started. Cluster name: ~A" config:*cluster.name*)
+           (log:info "[Server] All subsystems started. Cluster name: ~A" (config:cluster.name))
            *server-instance*)
       (when *server-instance*
         (stop-server)))))

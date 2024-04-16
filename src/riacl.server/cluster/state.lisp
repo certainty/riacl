@@ -50,13 +50,22 @@
     :reader state-members
     :initarg :members
     :initform (error "members is required")
-    :type list)
+    :type hash-table)
    (ring
     :reader state-ring
     :initarg :ring
     :initform (error "ring is required")
     :type ring:consistent-hash-ring))
   (:documentation "The state that represents the knowledge of a particular node about the cluster. This state is passed around in the cluster and is the core of the distributed state machine."))
+
+(defun make-state (cluster-name node-id)
+  "Create a fresh state for the (physical) node with `node-id' and the given `cluser-name'"
+  (make-instance 'state
+                 :cluster-name cluster-name
+                 :node-id node-id
+                 :vector-clock (dvv:make-dotted-version-vector)
+                 :members (make-hash-table :test #'identifier:identifier=)
+                 :ring (ring:make-ring)))
 
 (defun serialize-state ()
   "Serialize the state to be send over the wire"

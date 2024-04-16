@@ -24,6 +24,7 @@
     :initform (error "partitions must be provided")
     :type vector)))
 
+
 (-> make-ring (ring-size (integer)))
 (defun make-ring (size seed-node)
   (make-instance 'consistent-hash-ring

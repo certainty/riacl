@@ -19,7 +19,7 @@
 (defun make-data-api (cluster-node-id)
   (let ((endpoint (make-instance 'data-api
                                  :cluster-node-id cluster-node-id
-                                 :listen-address config:*api.data.listen-address*
+                                 :listen-address (config:api.data.listen-address)
                                  :name "data-api")))
     (register-routes endpoint)
     endpoint))

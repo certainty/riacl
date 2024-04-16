@@ -18,7 +18,7 @@
 (defun make-control-api (cluster-node-id)
   (let ((endpoint (make-instance 'control-api
                                  :cluster-node-id cluster-node-id
-                                 :listen-address config:*api.control.listen-address*
+                                 :listen-address (config:api.control.listen-address)
                                  :name "control-api")))
     (register-routes endpoint)
     endpoint))

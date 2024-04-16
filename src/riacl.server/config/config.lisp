@@ -3,22 +3,31 @@
 (s:defconst +system-path+ (asdf:system-source-directory :riacl/server))
 (s:defconst +env-file-pathname+ (asdf:system-relative-pathname :riacl/server ".env"))
 
-(defparameter *log.level* :info "The log level to use")
+(defmacro define-config-variable (config-name default doc)
+  (let ((variable-name (a:symbolicate "*" config-name "*"))
+        (reader-name config-name))
+    `(progn
+       (defparameter ,variable-name ,default ,doc)
+       (defun ,reader-name ()
+         ,doc
+         ,variable-name))))
 
-(defparameter *cluster.name* "riacl" "The name of the cluster")
-(defparameter *cluster.seed-nodes* '() "The seed nodes to use")
-(defparameter *cluster.ring-size* 1024 "The size of the ring")
-(defparameter *cluster.members* '() "The initial members of the cluster. Must be valid nodenames")
+(define-config-variable log.level :info "The log level to use")
 
-(defparameter *bucket.default.read-quorum* 2 "The number of replicas to read from before considering a read successful")
-(defparameter *bucket.default.write-quorum* 2 "The number of replicas to write to before considering a write successful")
-(defparameter *bucket.default.replicas* 3 "The number of replicas to store")
-(defparameter *bucket.default.conflict-resolution* :last-write-wins "The conflict resolution strategy to use")
+(define-config-variable cluster.name "riacl" "The name of the cluster")
+(define-config-variable cluster.seed-nodes '() "The seed nodes to use")
+(define-config-variable cluster.ring-size 1024 "The size of the ring")
+(define-config-variable cluster.members '() "The initial members of the cluster. Must be valid nodenames")
 
-(defvar *storage.backend* :memory "The storage backend to use")
+(define-config-variable bucket.default.read-quorum 2 "The number of replicas to read from before considering a read successful")
+(define-config-variable bucket.default.write-quorum 2 "The number of replicas to write to before considering a write successful")
+(define-config-variable bucket.default.replicas 3 "The number of replicas to store")
+(define-config-variable bucket.default.conflict-resolution :last-write-wins "The conflict resolution strategy to use")
 
-(defvar *api.data.listen-address* nil "The address to listen for API requests")
-(defvar *api.control.listen-address* nil "The address to listen for control requests." )
+(define-config-variable storage.backend :memory "The storage backend to use")
+
+(define-config-variable api.data.listen-address nil "The address to listen for API requests")
+(define-config-variable api.control.listen-address nil "The address to listen for control requests." )
 
 (define-condition invalid-configuration-value (error)
   ((name :initarg :name :reader name)

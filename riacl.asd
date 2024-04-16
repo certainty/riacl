@@ -53,7 +53,8 @@
     :components
     ((:file "identifiers")
      (:file "dvv")
-     (:file "cluster")
+     (:file "ring")
+     (:file "state")
      (:file "manager")))
 
    (:module "api"
