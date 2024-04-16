@@ -335,10 +335,9 @@ Is used in `merge*' to fold over the list of `dvvs'.
 (-> merge-histories (list list) list)
 (defun merge-histories (historyA historyB)
   "Merges `historyA' and `historyB' and returns the new history.
-
 The resulting history is created by applying a pair-wise merge of `dot's.
 In case the two `dot's have equal `actor-id' they will be merged using `merge-dots'.
-Otherwise they will be inserted at the appropriate postion.
+Otherwise they will be inserted at the appropriate position.
 The result is a combined history, ordered by `actor-id'
 
 You should not have to use this function directly, but use `merge*' instead.
